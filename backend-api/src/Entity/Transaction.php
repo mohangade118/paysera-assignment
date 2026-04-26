@@ -30,12 +30,12 @@ class Transaction
     #[ORM\Column(length: 255)]
     private string $receipt;
 
-    #[ORM\ManyToOne(targetEntity: Account::class, inversedBy: 'debit_transactions')]
-    #[ORM\JoinColumn(name: 'from_account_id', referencedColumnName: 'debit_transactions', nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Account::class, inversedBy: 'debitTransactions')]
+    #[ORM\JoinColumn(name: 'from_account_id', referencedColumnName: 'id', nullable: false)]
     private Account $fromAccount;
 
-    #[ORM\ManyToOne(targetEntity: Account::class, inversedBy: 'credit_transactions')]
-    #[ORM\JoinColumn(name: 'to_account_id', referencedColumnName: 'credit_transactions', nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Account::class, inversedBy: 'creditTransactions')]
+    #[ORM\JoinColumn(name: 'to_account_id', referencedColumnName: 'id', nullable: false)]
     private Account $toAccount;
 
 
