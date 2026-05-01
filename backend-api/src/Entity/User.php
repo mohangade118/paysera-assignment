@@ -26,7 +26,7 @@ class User
     #[ORM\Column(name: 'last_name', type: Types::STRING, length: 25)]
     private string $lastName;
 
-    #[ORM\Column(name: 'email', type: Types::STRING, length: 25, unique: true)]
+    #[ORM\Column(name: 'email', type: Types::STRING, length: 50, unique: true)]
     private string $email;
 
     #[ORM\Column(name: 'password', type: Types::STRING, length: 50)]
