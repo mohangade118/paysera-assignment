@@ -8,12 +8,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "users", indexes: [
     new ORM\Index(name: "idx_users_email", columns: ["email"]),
 ])]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -29,8 +31,11 @@ class User
     #[ORM\Column(name: 'email', type: Types::STRING, length: 50, unique: true)]
     private string $email;
 
-    #[ORM\Column(name: 'password', type: Types::STRING, length: 50)]
+    #[ORM\Column(name: 'password', type: Types::STRING, length: 255)]
     private string $password;
+
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
 
     #[ORM\Column(name: 'contact_no', type: Types::STRING, length: 10, unique: true)]
     private string $contactNo;
@@ -84,7 +89,12 @@ class User
         return $this;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    public function getUserIdentifier(): string
     {
         return $this->email;
     }
@@ -96,9 +106,24 @@ class User
         return $this;
     }
 
-    public function getPassword(): ?string
+    public function getPassword(): string
     {
         return $this->password;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+
+        return array_values(array_unique($roles));
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
     }
 
     public function setPassword(string $password): static
@@ -106,6 +131,10 @@ class User
         $this->password = $password;
 
         return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
     }
 
     public function getContactNo(): ?string
