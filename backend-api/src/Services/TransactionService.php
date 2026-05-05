@@ -33,14 +33,7 @@ class TransactionService
 
         try {
             /** @var Account|null $from */
-            $from = $this->accountRepository->createQueryBuilder('a')
-                ->andWhere('a.id = :accountId')
-                ->andWhere('IDENTITY(a.user) = :userId')
-                ->setParameter('accountId', $fromAccountId)
-                ->setParameter('userId', $authenticatedUserId)
-                ->getQuery()
-                ->setLockMode(LockMode::PESSIMISTIC_WRITE)
-                ->getOneOrNullResult();
+            $from = $this->accountRepository->findOneOwnedByUserIdForUpdate($fromAccountId, $authenticatedUserId);
 
             if ($from === null) {
                 $fromAccountExists = $this->accountRepository->find($fromAccountId);
