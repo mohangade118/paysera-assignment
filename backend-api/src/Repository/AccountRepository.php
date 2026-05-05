@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Account;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\LockMode;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -14,6 +15,35 @@ class AccountRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Account::class);
+    }
+
+    public function findOneOwnedByUserId(int $accountId, int $userId): ?Account
+    {
+        /** @var Account|null $account */
+        $account = $this->createQueryBuilder('a')
+            ->andWhere('a.id = :accountId')
+            ->andWhere('IDENTITY(a.user) = :userId')
+            ->setParameter('accountId', $accountId)
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $account;
+    }
+
+    public function findOneOwnedByUserIdForUpdate(int $accountId, int $userId): ?Account
+    {
+        /** @var Account|null $account */
+        $account = $this->createQueryBuilder('a')
+            ->andWhere('a.id = :accountId')
+            ->andWhere('IDENTITY(a.user) = :userId')
+            ->setParameter('accountId', $accountId)
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->setLockMode(LockMode::PESSIMISTIC_WRITE)
+            ->getOneOrNullResult();
+
+        return $account;
     }
 
 //    /**

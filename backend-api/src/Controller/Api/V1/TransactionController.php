@@ -3,11 +3,13 @@
 namespace App\Controller\Api\V1;
 
 use App\Dto\CreateTransactionRequest;
+use App\Entity\User;
 use App\Services\TransactionService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class TransactionController extends AbstractController
@@ -36,10 +38,16 @@ final class TransactionController extends AbstractController
             'amount' => $amount,
         ];
 
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw new AccessDeniedHttpException('Authenticated user is required');
+        }
+
         $this->logger->info('transaction_transfer_requested', $domainContext);
 
         try {
             $transaction = $this->transactionService->transfer(
+                $user->getId(),
                 $fromId,
                 $toId,
                 $amount,

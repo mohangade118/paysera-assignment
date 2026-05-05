@@ -4,34 +4,58 @@ namespace App\Services;
 
 use App\Entity\Account;
 use App\Entity\Transaction;
+use App\Repository\AccountRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TransactionService
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager)
-    {
-    }
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly AccountRepository $accountRepository,
+    ) {}
 
-    public function transfer(int $fromAccountId, int $toAccountId, float $amount, ?string $note = null, ?string $receipt = null): Transaction
+    public function transfer(
+        int $authenticatedUserId,
+        int $fromAccountId,
+        int $toAccountId,
+        float $amount,
+        ?string $note = null,
+        ?string $receipt = null
+    ): Transaction
     {
         $connection = $this->entityManager->getConnection();
         $connection->beginTransaction();
 
         try {
             /** @var Account|null $from */
-            $from = $this->entityManager->find(Account::class, $fromAccountId, LockMode::PESSIMISTIC_WRITE);
+            $from = $this->accountRepository->findOneOwnedByUserIdForUpdate($fromAccountId, $authenticatedUserId);
+
             if ($from === null) {
-                throw new NotFoundHttpException('from_account_id not found');
+                $fromAccountExists = $this->accountRepository->find($fromAccountId);
+                if ($fromAccountExists === null) {
+                    throw new NotFoundHttpException('from_account_id not found');
+                }
+
+                throw new AccessDeniedHttpException('from_account_id does not belong to the authenticated user');
+            }
+
+            /** @var Account|null $from */
+            if ($from->getStatus() !== 1) {
+                throw new BadRequestHttpException('from_account_id is inactive');
             }
 
             /** @var Account|null $to */
             $to = $this->entityManager->find(Account::class, $toAccountId, LockMode::PESSIMISTIC_WRITE);
             if ($to === null) {
                 throw new NotFoundHttpException('to_account_id not found');
+            }
+            if ($to->getStatus() !== 1) {
+                throw new BadRequestHttpException('to_account_id is inactive');
             }
 
             if ($from->getBalance() < $amount) {
