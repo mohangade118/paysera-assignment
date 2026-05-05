@@ -11,6 +11,7 @@ services:
     depends_on:
       - mysql
       - redis
+      - rabbitmq
 
   nginx:
     image: nginx:alpine
@@ -41,6 +42,16 @@ services:
     container_name: paysera_assignment_redis
     ports:
       - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: paysera_assignment_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: paysera
+      RABBITMQ_DEFAULT_PASS: paysera
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
 volumes:
   mysql_data:
