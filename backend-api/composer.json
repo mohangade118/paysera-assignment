@@ -7,26 +7,30 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "doctrine/doctrine-bundle": "^2.18",
+        "doctrine/doctrine-bundle": "^2.18.2",
         "doctrine/doctrine-migrations-bundle": "^3.7",
-        "doctrine/orm": "^3.6",
+        "doctrine/orm": "^3.6.3",
         "lexik/jwt-authentication-bundle": "^3.2",
-        "phpdocumentor/reflection-docblock": "^6.0",
-        "phpstan/phpdoc-parser": "^2.3",
+        "phpdocumentor/reflection-docblock": "^6.0.3",
+        "phpstan/phpdoc-parser": "^2.3.2",
         "symfony/cache": "7.4.*",
         "symfony/console": "7.4.*",
         "symfony/dotenv": "7.4.*",
         "symfony/expression-language": "7.4.*",
-        "symfony/flex": "^2",
+        "symfony/flex": "^2.10",
+        "symfony/amqp-messenger": "7.4.*",
         "symfony/framework-bundle": "7.4.*",
-        "symfony/monolog-bundle": "^3.0|^4.0",
+        "symfony/mailer": "7.4.*",
+        "symfony/messenger": "7.4.*",
+        "symfony/monolog-bundle": "^3.0|^4.0.2",
         "symfony/property-access": "7.4.*",
         "symfony/property-info": "7.4.*",
         "symfony/runtime": "7.4.*",
         "symfony/security-bundle": "7.4.*",
         "symfony/serializer": "7.4.*",
         "symfony/validator": "7.4.*",
-        "symfony/yaml": "7.4.*"
+        "symfony/yaml": "7.4.*",
+        "twilio/sdk": "^8.11.4"
     },
     "config": {
         "allow-plugins": {
@@ -62,6 +66,7 @@
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
+        "messenger:consume:async": "php bin/console messenger:consume async -vv",
         "post-install-cmd": [
             "@auto-scripts"
         ],
@@ -79,9 +84,9 @@
         }
     },
     "require-dev": {
-        "doctrine/doctrine-fixtures-bundle": "^4.3",
-        "friendsofphp/php-cs-fixer": "^3.95",
-        "phpstan/phpstan": "^2.1",
+        "doctrine/doctrine-fixtures-bundle": "^4.3.1",
+        "friendsofphp/php-cs-fixer": "^3.95.1",
+        "phpstan/phpstan": "^2.1.54",
         "symfony/debug-bundle": "7.4.*",
         "symfony/maker-bundle": "^1.67",
         "symfony/stopwatch": "7.4.*",

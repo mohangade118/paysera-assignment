@@ -30,8 +30,8 @@ class UserFixtures extends Fixture
         $user1 = new User();
         $user1->setFirstName('Amit')
             ->setLastName('Sharma')
-            ->setEmail('amit.sharma92@gmail.com')
-            ->setContactNo('9876543210')
+            ->setEmail('mohangade118@gmail.com')
+            ->setContactNo('8793281988')
             ->setRoles([])
             ->setPassword($this->passwordHasher->hashPassword($user1, $plainPassword))
             ->setCreatedAt(new DateTimeImmutableAlias())
@@ -42,8 +42,8 @@ class UserFixtures extends Fixture
         $user2 = new User();
         $user2->setFirstName('Priya')
             ->setLastName('Kulkarni')
-            ->setEmail('priya.kulkarni88@gmail.com')
-            ->setContactNo('9123456780')
+            ->setEmail('mohangade08@gmail.com')
+            ->setContactNo('8459206766')
             ->setRoles([])
             ->setPassword($this->passwordHasher->hashPassword($user2, $plainPassword))
             ->setCreatedAt(new DateTimeImmutableAlias())

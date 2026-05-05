@@ -1,0 +1,6 @@
+{
+    "require": {
+        "symfony/messenger": "^7.4",
+        "symfony/mailer": "^7.4"
+    }
+}
