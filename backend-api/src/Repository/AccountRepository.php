@@ -16,6 +16,20 @@ class AccountRepository extends ServiceEntityRepository
         parent::__construct($registry, Account::class);
     }
 
+    public function findOneOwnedByUserId(int $accountId, int $userId): ?Account
+    {
+        /** @var Account|null $account */
+        $account = $this->createQueryBuilder('a')
+            ->andWhere('a.id = :accountId')
+            ->andWhere('IDENTITY(a.user) = :userId')
+            ->setParameter('accountId', $accountId)
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $account;
+    }
+
 //    /**
 //     * @return Account[] Returns an array of Account objects
 //     */
