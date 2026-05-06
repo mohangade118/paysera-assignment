@@ -79,12 +79,24 @@ class TransactionService
             $this->entityManager->flush();
 
             $connection->commit();
-
+            $this->sendEmailNotification($transaction);
             return $transaction;
         } catch (\Throwable $e) {
             $connection->rollBack();
             throw $e;
         }
+    }
+
+
+    private function sendEmailNotification(Transaction $transaction): void
+    {
+        $email = (new Email())
+        ->from('mohangade118@gmail.com')
+        ->to($transaction->getFromAccount()->getUser()->getEmail())
+        ->subject('Transaction Succeeded')
+        ->text('Transaction Succeeded');
+        
+        $this->mailer->send($email);
     }
 
 }
