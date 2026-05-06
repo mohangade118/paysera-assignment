@@ -4,19 +4,21 @@ namespace App\Services;
 
 use App\Entity\Account;
 use App\Entity\Transaction;
+use App\Message\TransactionSucceededMessage;
 use App\Repository\AccountRepository;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class TransactionService
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly AccountRepository $accountRepository,
+        private readonly MessageBusInterface $messageBus,
     ) {}
 
     public function transfer(
@@ -34,7 +36,6 @@ class TransactionService
         try {
             /** @var Account|null $from */
             $from = $this->accountRepository->findOneOwnedByUserIdForUpdate($fromAccountId, $authenticatedUserId);
-
             if ($from === null) {
                 $fromAccountExists = $this->accountRepository->find($fromAccountId);
                 if ($fromAccountExists === null) {
@@ -43,7 +44,6 @@ class TransactionService
 
                 throw new AccessDeniedHttpException('from_account_id does not belong to the authenticated user');
             }
-
             /** @var Account|null $from */
             if ($from->getStatus() !== 1) {
                 throw new BadRequestHttpException('from_account_id is inactive');
@@ -79,24 +79,16 @@ class TransactionService
             $this->entityManager->flush();
 
             $connection->commit();
-            $this->sendEmailNotification($transaction);
-            return $transaction;
+            $this->messageBus->dispatch(new TransactionSucceededMessage((int) $transaction->getId()));
+
         } catch (\Throwable $e) {
-            $connection->rollBack();
+            if ($connection->isTransactionActive()) {
+                $connection->rollBack();
+            }
             throw $e;
         }
+
+
+        return $transaction;
     }
-
-
-    private function sendEmailNotification(Transaction $transaction): void
-    {
-        $email = (new Email())
-        ->from('mohangade118@gmail.com')
-        ->to($transaction->getFromAccount()->getUser()->getEmail())
-        ->subject('Transaction Succeeded')
-        ->text('Transaction Succeeded');
-        
-        $this->mailer->send($email);
-    }
-
 }
