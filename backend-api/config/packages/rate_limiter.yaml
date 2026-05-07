@@ -1,0 +1,26 @@
+framework:
+    rate_limiter:
+        # Baseline limiter for all /api endpoints (per authenticated user or IP)
+        api_global:
+            policy: 'token_bucket'
+            limit: 60
+            rate:
+                interval: '1 minute'
+                amount: 60
+
+        # Stricter limiter for money-moving transaction endpoint
+        api_transaction_post:
+            policy: 'token_bucket'
+            limit: 10
+            rate:
+                interval: '1 minute'
+                amount: 10
+
+        # Stricter limiter for test email endpoint to avoid abuse
+        api_test_email_post:
+            policy: 'token_bucket'
+            limit: 3
+            rate:
+                interval: '1 hour'
+                amount: 3
+
