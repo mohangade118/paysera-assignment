@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit;
+namespace App\Tests\Unit\Dto;
 
 use App\Dto\CreateTransactionRequest;
 use PHPUnit\Framework\Attributes\DataProvider;

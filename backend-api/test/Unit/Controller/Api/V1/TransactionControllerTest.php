@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit;
+namespace App\Tests\Unit\Controller\Api\V1;
 
 use App\Controller\Api\V1\TransactionController;
 use App\Dto\CreateTransactionRequest;
