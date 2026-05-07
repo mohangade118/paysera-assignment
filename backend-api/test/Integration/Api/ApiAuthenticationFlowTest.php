@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Integration;
+namespace App\Tests\Integration\Api;
 
 use App\DataFixtures\UserFixtures;
 use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
