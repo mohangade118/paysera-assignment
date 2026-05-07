@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\TransactionRepository;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -38,6 +39,8 @@ class Transaction
     #[ORM\JoinColumn(name: 'to_account_id', referencedColumnName: 'id', nullable: false)]
     private Account $toAccount;
 
+    #[ORM\Column(name: 'notifications_sent_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $notificationsSentAt = null;
 
     public function getId(): ?int
     {
@@ -112,6 +115,18 @@ class Transaction
     public function setToAccount(?Account $toAccount): static
     {
         $this->toAccount = $toAccount;
+
+        return $this;
+    }
+
+    public function getNotificationsSentAt(): ?DateTimeImmutable
+    {
+        return $this->notificationsSentAt;
+    }
+
+    public function setNotificationsSentAt(?DateTimeImmutable $notificationsSentAt): static
+    {
+        $this->notificationsSentAt = $notificationsSentAt;
 
         return $this;
     }

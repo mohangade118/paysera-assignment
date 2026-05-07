@@ -4,7 +4,6 @@ namespace App\MessageHandler;
 
 use App\Message\TransactionSucceededMessage;
 use App\Repository\TransactionRepository;
-use App\Service\Notification\TwilioSmsSender;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -20,7 +19,6 @@ final class TransactionSucceededHandler
         private readonly TransactionRepository $transactionRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly MailerInterface $mailer,
-        private readonly TwilioSmsSender $smsSender,
         private readonly LoggerInterface $logger,
         #[Autowire('%env(MAILER_FROM_EMAIL)%')]
         private readonly string $fromEmail,
@@ -84,14 +82,6 @@ final class TransactionSucceededHandler
                     ->to($toUser->getEmail())
                     ->subject($subject)
                     ->text($body));
-            }
-
-            if ($fromUser->getContactNo() !== null && $fromUser->getContactNo() !== '') {
-                $this->smsSender->send($fromUser->getContactNo(), $subject);
-            }
-
-            if ($toUser->getContactNo() !== null && $toUser->getContactNo() !== '') {
-                $this->smsSender->send($toUser->getContactNo(), $subject);
             }
 
             $transaction->setNotificationsSentAt(new DateTimeImmutable());

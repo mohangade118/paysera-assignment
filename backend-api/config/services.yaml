@@ -19,11 +19,5 @@ services:
     App\:
         resource: '../src/'
 
-    App\Service\Notification\TwilioSmsSender:
-        arguments:
-            $accountSid: '%env(TWILIO_ACCOUNT_SID)%'
-            $authToken: '%env(TWILIO_AUTH_TOKEN)%'
-            $fromNumber: '%env(TWILIO_FROM_NUMBER)%'
-
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
