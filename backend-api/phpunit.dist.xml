@@ -7,19 +7,23 @@
          failOnDeprecation="true"
          failOnNotice="true"
          failOnWarning="true"
-         bootstrap="tests/bootstrap.php"
+         bootstrap="test/bootstrap.php"
          cacheDirectory=".phpunit.cache"
 >
     <php>
         <ini name="display_errors" value="1" />
         <ini name="error_reporting" value="-1" />
+        <env name="APP_ENV" value="test" force="true" />
         <server name="APP_ENV" value="test" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
     </php>
 
     <testsuites>
-        <testsuite name="Project Test Suite">
-            <directory>tests</directory>
+        <testsuite name="unit">
+            <directory>test/Unit</directory>
+        </testsuite>
+        <testsuite name="integration">
+            <directory>test/Integration</directory>
         </testsuite>
     </testsuites>
 
@@ -38,7 +42,4 @@
             <function>trigger_deprecation</function>
         </deprecationTrigger>
     </source>
-
-    <extensions>
-    </extensions>
 </phpunit>

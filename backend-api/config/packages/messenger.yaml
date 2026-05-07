@@ -18,3 +18,9 @@ framework:
 
         routing:
             'App\Message\TransactionSucceededMessage': async
+
+when@test:
+    framework:
+        messenger:
+            routing:
+                'App\Message\TransactionSucceededMessage': sync

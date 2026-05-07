@@ -8,10 +8,9 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TransactionRepository::class)]
-#[ORM\Table(name: "transactions", indexes: [
-    new ORM\Index(name: "idx_transaction_from_ac_id", columns: ["from_account_id"]),
-    new ORM\Index(name: "idx_transaction_to_ac_id", columns: ["to_account_id"]),
-])]
+#[ORM\Table(name: "transactions")]
+#[ORM\Index(name: "idx_transaction_from_ac_id", columns: ["from_account_id"])]
+#[ORM\Index(name: "idx_transaction_to_ac_id", columns: ["to_account_id"])]
 class Transaction
 {
     #[ORM\Id]

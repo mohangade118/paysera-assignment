@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="test/bootstrap.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+>
+    <php>
+        <ini name="display_errors" value="1"/>
+        <ini name="error_reporting" value="-1"/>
+        <server name="APP_ENV" value="test" force="true"/>
+        <server name="SHELL_VERBOSITY" value="-1"/>
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
+        <env name="APP_SECRET" value="b88c944c32f8ba40afecfaee9f6f01ec" force="true"/>
+        <env name="DEFAULT_URI" value="http://localhost" force="true"/>
+        <env name="MESSENGER_TRANSPORT_DSN" value="sync://" force="true"/>
+        <env name="MAILER_DSN" value="null://null" force="true"/>
+        <env name="DATABASE_URL" value="mysql://paysera:paysera@127.0.0.1:3306/paysera-assignment?serverVersion=8.0&amp;charset=utf8mb4" force="true"/>
+    </php>
+
+    <testsuites>
+        <testsuite name="unit">
+            <directory>test/Unit</directory>
+        </testsuite>
+        <testsuite name="integration">
+            <directory>test/Integration</directory>
+        </testsuite>
+    </testsuites>
+
+    <source ignoreIndirectDeprecations="true" ignoreSuppressionOfDeprecations="true" restrictNotices="true" restrictWarnings="true">
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+</phpunit>

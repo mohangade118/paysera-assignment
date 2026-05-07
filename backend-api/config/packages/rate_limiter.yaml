@@ -15,3 +15,32 @@ framework:
             rate:
                 interval: '1 minute'
                 amount: 10
+
+        api_test_email_post:
+            policy: 'token_bucket'
+            limit: 10
+            rate:
+                interval: '1 minute'
+                amount: 20
+
+when@test:
+    framework:
+        rate_limiter:
+            api_global:
+                policy: 'token_bucket'
+                limit: 100000
+                rate:
+                    interval: '1 minute'
+                    amount: 100000
+            api_transaction_post:
+                policy: 'token_bucket'
+                limit: 100000
+                rate:
+                    interval: '1 minute'
+                    amount: 100000
+            api_test_email_post:
+                policy: 'token_bucket'
+                limit: 100000
+                rate:
+                    interval: '1 minute'
+                    amount: 100000
