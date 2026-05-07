@@ -11,16 +11,7 @@ framework:
         # Stricter limiter for money-moving transaction endpoint
         api_transaction_post:
             policy: 'token_bucket'
-            limit: 10
+            limit: 5
             rate:
                 interval: '1 minute'
                 amount: 10
-
-        # Stricter limiter for test email endpoint to avoid abuse
-        api_test_email_post:
-            policy: 'token_bucket'
-            limit: 3
-            rate:
-                interval: '1 hour'
-                amount: 3
-

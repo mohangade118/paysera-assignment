@@ -98,10 +98,6 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
             return $this->transactionPostLimiter;
         }
 
-        if ($routeName === 'app_test_email' && $method === 'POST') {
-            return $this->testEmailPostLimiter;
-        }
-
         // Fallback global limiter for the rest of the API
         return $this->apiGlobalLimiter;
     }
