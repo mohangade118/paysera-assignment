@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\RateLimiter\LimiterInterface;
 use Symfony\Component\RateLimiter\RateLimit;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 final class ApiRateLimitSubscriberTest extends TestCase
@@ -84,16 +84,16 @@ final class ApiRateLimitSubscriberTest extends TestCase
         $limiter = $this->createMock(LimiterInterface::class);
         $limiter->expects(self::once())->method('consume')->with(1)->willReturn($limitAccepted);
 
-        $apiGlobalLimiter = $this->createMock(RateLimiterFactory::class);
+        $apiGlobalLimiter = $this->createMock(RateLimiterFactoryInterface::class);
         $apiGlobalLimiter->expects(self::once())
             ->method('create')
             ->with('ip:10.0.0.1')
             ->willReturn($limiter);
 
-        $transactionPostLimiter = $this->createMock(RateLimiterFactory::class);
+        $transactionPostLimiter = $this->createMock(RateLimiterFactoryInterface::class);
         $transactionPostLimiter->expects(self::never())->method('create');
 
-        $testEmailLimiter = $this->createMock(RateLimiterFactory::class);
+        $testEmailLimiter = $this->createMock(RateLimiterFactoryInterface::class);
         $testEmailLimiter->expects(self::never())->method('create');
 
         $logger = $this->createMock(LoggerInterface::class);
@@ -126,16 +126,16 @@ final class ApiRateLimitSubscriberTest extends TestCase
         $limiter = $this->createMock(LimiterInterface::class);
         $limiter->expects(self::once())->method('consume')->with(1)->willReturn($limitAccepted);
 
-        $transactionPostLimiter = $this->createMock(RateLimiterFactory::class);
+        $transactionPostLimiter = $this->createMock(RateLimiterFactoryInterface::class);
         $transactionPostLimiter->expects(self::once())
             ->method('create')
             ->with('ip:192.168.0.2')
             ->willReturn($limiter);
 
-        $apiGlobalLimiter = $this->createMock(RateLimiterFactory::class);
+        $apiGlobalLimiter = $this->createMock(RateLimiterFactoryInterface::class);
         $apiGlobalLimiter->expects(self::never())->method('create');
 
-        $testEmailLimiter = $this->createMock(RateLimiterFactory::class);
+        $testEmailLimiter = $this->createMock(RateLimiterFactoryInterface::class);
         $testEmailLimiter->expects(self::never())->method('create');
 
         $subscriber = new ApiRateLimitSubscriber(
@@ -168,13 +168,13 @@ final class ApiRateLimitSubscriberTest extends TestCase
         $limiter = $this->createMock(LimiterInterface::class);
         $limiter->method('consume')->willReturn($limitAccepted);
 
-        $apiGlobalLimiter = $this->createMock(RateLimiterFactory::class);
+        $apiGlobalLimiter = $this->createMock(RateLimiterFactoryInterface::class);
         $apiGlobalLimiter->expects(self::once())->method('create')->with('user:99')->willReturn($limiter);
 
         $subscriber = new ApiRateLimitSubscriber(
             $apiGlobalLimiter,
-            $this->createMock(RateLimiterFactory::class),
-            $this->createMock(RateLimiterFactory::class),
+            $this->createMock(RateLimiterFactoryInterface::class),
+            $this->createMock(RateLimiterFactoryInterface::class),
             $security,
             $this->createMock(LoggerInterface::class),
         );
@@ -199,13 +199,13 @@ final class ApiRateLimitSubscriberTest extends TestCase
         $limiter = $this->createMock(LimiterInterface::class);
         $limiter->method('consume')->willReturn($limitAccepted);
 
-        $apiGlobalLimiter = $this->createMock(RateLimiterFactory::class);
+        $apiGlobalLimiter = $this->createMock(RateLimiterFactoryInterface::class);
         $apiGlobalLimiter->expects(self::once())->method('create')->with('ip:203.0.113.10')->willReturn($limiter);
 
         $subscriber = new ApiRateLimitSubscriber(
             $apiGlobalLimiter,
-            $this->createMock(RateLimiterFactory::class),
-            $this->createMock(RateLimiterFactory::class),
+            $this->createMock(RateLimiterFactoryInterface::class),
+            $this->createMock(RateLimiterFactoryInterface::class),
             $security,
             $this->createMock(LoggerInterface::class),
         );
@@ -230,7 +230,7 @@ final class ApiRateLimitSubscriberTest extends TestCase
         $limiter = $this->createMock(LimiterInterface::class);
         $limiter->expects(self::once())->method('consume')->with(1)->willReturn($limitRejected);
 
-        $apiGlobalLimiter = $this->createMock(RateLimiterFactory::class);
+        $apiGlobalLimiter = $this->createMock(RateLimiterFactoryInterface::class);
         $apiGlobalLimiter->expects(self::once())
             ->method('create')
             ->with('ip:10.11.12.13')
@@ -257,8 +257,8 @@ final class ApiRateLimitSubscriberTest extends TestCase
 
         $subscriber = new ApiRateLimitSubscriber(
             $apiGlobalLimiter,
-            $this->createMock(RateLimiterFactory::class),
-            $this->createMock(RateLimiterFactory::class),
+            $this->createMock(RateLimiterFactoryInterface::class),
+            $this->createMock(RateLimiterFactoryInterface::class),
             $security,
             $logger,
         );
@@ -289,9 +289,9 @@ final class ApiRateLimitSubscriberTest extends TestCase
     private function createSubscriberWithAcceptedGlobal(): ApiRateLimitSubscriber
     {
         return new ApiRateLimitSubscriber(
-            $this->createMock(RateLimiterFactory::class),
-            $this->createMock(RateLimiterFactory::class),
-            $this->createMock(RateLimiterFactory::class),
+            $this->createMock(RateLimiterFactoryInterface::class),
+            $this->createMock(RateLimiterFactoryInterface::class),
+            $this->createMock(RateLimiterFactoryInterface::class),
             $this->createMock(Security::class),
             $this->createMock(LoggerInterface::class),
         );
