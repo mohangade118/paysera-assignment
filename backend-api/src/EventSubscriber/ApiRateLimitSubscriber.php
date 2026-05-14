@@ -8,7 +8,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -16,11 +16,11 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         #[Autowire(service: 'limiter.api_global')]
-        private readonly RateLimiterFactory $apiGlobalLimiter,
+        private readonly RateLimiterFactoryInterface $apiGlobalLimiter,
         #[Autowire(service: 'limiter.api_transaction_post')]
-        private readonly RateLimiterFactory $transactionPostLimiter,
+        private readonly RateLimiterFactoryInterface $transactionPostLimiter,
         #[Autowire(service: 'limiter.api_test_email_post')]
-        private readonly RateLimiterFactory $testEmailPostLimiter,
+        private readonly RateLimiterFactoryInterface $testEmailPostLimiter,
         private readonly Security $security,
         private readonly LoggerInterface $logger,
     ) {
@@ -91,7 +91,7 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         $event->setResponse($response);
     }
 
-    private function resolveLimiterFactory(string $routeName, string $method): RateLimiterFactory
+    private function resolveLimiterFactory(string $routeName, string $method): RateLimiterFactoryInterface
     {
         // Specific per-endpoint limits first
         if ($routeName === 'app_transaction' && $method === 'POST') {

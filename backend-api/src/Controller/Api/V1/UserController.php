@@ -31,7 +31,7 @@ final class UserController extends AbstractController
             $user->setFirstName('Mohan')
                 ->setLastName('Gade')
                 ->setEmail($email)
-                ->setContactNo('8793281988')
+                ->setContactNo('9001112233')
                 ->setPassword($this->passwordHasher->hashPassword($user, 'password'))
                 ->setCreatedAt(new \DateTimeImmutable())
                 ->setUpdatedAt(new \DateTimeImmutable());

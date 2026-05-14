@@ -56,6 +56,9 @@ security:
 
 when@test:
     security:
+        firewalls:
+            login:
+                login_throttling: false
         password_hashers:
             # Password hashers are resource-intensive by design to ensure security.
             # In tests, it's safe to reduce their cost to improve performance.

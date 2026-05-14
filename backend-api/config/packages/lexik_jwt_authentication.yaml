@@ -2,3 +2,9 @@ lexik_jwt_authentication:
     secret_key: '%env(resolve:JWT_SECRET_KEY)%'
     public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
     pass_phrase: '%env(JWT_PASSPHRASE)%'
+
+when@test:
+    lexik_jwt_authentication:
+        secret_key: '%kernel.project_dir%/test/fixtures/jwt/private.pem'
+        public_key: '%kernel.project_dir%/test/fixtures/jwt/public.pem'
+        pass_phrase: ''
