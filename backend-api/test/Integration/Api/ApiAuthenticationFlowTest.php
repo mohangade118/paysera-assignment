@@ -5,21 +5,20 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Api;
 
 use App\DataFixtures\UserFixtures;
-use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
-use Doctrine\Common\DataFixtures\Loader;
-use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use App\Tests\Support\ReloadsDoctrineFixtures;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Requires: migrations on test DB, MySQL from .env.test. JWT uses keys in test/fixtures/jwt/ (test env).
  */
 final class ApiAuthenticationFlowTest extends WebTestCase
 {
+    use ReloadsDoctrineFixtures;
+
     public function testLoginReturnsTokenAndTokenAccessesProtectedRoute(): void
     {
         $client = static::createClient();
-        $this->reloadFixtures();
+        $this->purgeAndLoadFixtures(static::getContainer()->get(UserFixtures::class));
 
         $client->request(
             'POST',
@@ -52,19 +51,5 @@ final class ApiAuthenticationFlowTest extends WebTestCase
         self::assertResponseIsSuccessful();
         $body = json_decode($client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
         self::assertArrayHasKey('data', $body);
-    }
-
-    private function reloadFixtures(): void
-    {
-        $container = static::getContainer();
-        $em = $container->get('doctrine')->getManager();
-        $purger = new ORMPurger($em);
-        $purger->purge();
-
-        $loader = new Loader();
-        $loader->addFixture(new UserFixtures($container->get(UserPasswordHasherInterface::class)));
-
-        $executor = new ORMExecutor($em);
-        $executor->execute($loader->getFixtures(), true);
     }
 }
