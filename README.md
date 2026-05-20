@@ -31,3 +31,30 @@ Async messages use RabbitMQ. The default DSN in `backend-api/.env` uses host `ra
 1. Ensure RabbitMQ is up: `docker compose ps rabbitmq`
 2. Check health: `docker compose exec rabbitmq rabbitmq-diagnostics ping`
 3. Match DSN host to where PHP runs: `rabbitmq` in containers, `127.0.0.1` on the host
+
+## Testing
+
+PHPUnit runs inside the `php` container against an isolated `*_test` database and Lexik JWT keys under `test/fixtures/jwt/`.
+
+```bash
+# Generate JWT keys for the test environment (first time only)
+docker compose exec php php bin/console lexik:jwt:generate-keypair --overwrite --no-interaction --env=test
+
+# Install dev dependencies (phpunit/phpunit, phpunit-bridge, browser-kit)
+docker compose exec php composer update --no-interaction --dev
+
+# Create/migrate test DB and run all suites
+docker compose exec php composer test
+
+# Run individual suites
+docker compose exec php composer test:unit
+docker compose exec php composer test:functional
+```
+
+**Suites**
+
+| Suite | Path | Purpose |
+|-------|------|---------|
+| `unit` | `test/Unit/` | Fast tests with mocks (no HTTP, no real JWT) |
+| `functional` | `test/Integration/Api/` | HTTP tests: login → Bearer token → protected routes |
+| `integration` | `test/Integration/Repository/` | Doctrine repository tests with real DB |
