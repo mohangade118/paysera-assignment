@@ -47,8 +47,9 @@ final class TransactionServiceTest extends TestCase
             },
         );
 
-        $accountRepository = $this->createStub(AccountRepository::class);
-        $accountRepository->method('findOneOwnedByUserIdForUpdate')
+        $accountRepository = $this->createMock(AccountRepository::class);
+        $accountRepository->expects(self::once())
+            ->method('findOneOwnedByUserIdForUpdate')
             ->with(10, 1)
             ->willReturn($from);
 
@@ -81,9 +82,14 @@ final class TransactionServiceTest extends TestCase
         $entityManager = $this->createStub(EntityManagerInterface::class);
         $entityManager->method('getConnection')->willReturn($connection);
 
-        $accountRepository = $this->createStub(AccountRepository::class);
-        $accountRepository->method('findOneOwnedByUserIdForUpdate')->willReturn(null);
-        $accountRepository->method('find')->with(10)->willReturn($existingAccount);
+        $accountRepository = $this->createMock(AccountRepository::class);
+        $accountRepository->expects(self::once())
+            ->method('findOneOwnedByUserIdForUpdate')
+            ->willReturn(null);
+        $accountRepository->expects(self::once())
+            ->method('find')
+            ->with(10)
+            ->willReturn($existingAccount);
 
         $service = new TransactionService(
             $entityManager,
