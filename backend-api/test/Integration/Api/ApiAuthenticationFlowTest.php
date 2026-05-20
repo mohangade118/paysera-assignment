@@ -58,7 +58,7 @@ final class ApiAuthenticationFlowTest extends WebTestCase
 
         $client->request('GET', '/api/v1/users');
 
-        self::assertResponseStatusCodeSame(401);
+        self::assertResponseStatusCodeSame(403);
     }
 
     #[Test]

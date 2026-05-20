@@ -32,6 +32,7 @@ final class TransactionControllerTest extends TestCase
             ->setStatus('SUCCESS')
             ->setNote('')
             ->setReceipt('');
+        $this->setEntityId($transaction, 42);
 
         $transactionService = $this->createMock(TransactionService::class);
         $transactionService->expects(self::once())
@@ -109,5 +110,12 @@ final class TransactionControllerTest extends TestCase
         $idProperty->setValue($user, 1);
 
         return $user;
+    }
+
+    private function setEntityId(object $entity, int $id): void
+    {
+        $reflection = new \ReflectionClass($entity);
+        $idProperty = $reflection->getProperty('id');
+        $idProperty->setValue($entity, $id);
     }
 }

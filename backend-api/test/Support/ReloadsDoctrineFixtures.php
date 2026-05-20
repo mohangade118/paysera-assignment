@@ -17,7 +17,10 @@ trait ReloadsDoctrineFixtures
      */
     protected function purgeAndLoadFixtures(array $fixtureClasses): void
     {
-        self::bootKernel();
+        if (!static::$booted) {
+            self::bootKernel();
+        }
+
         $container = static::getContainer();
         $entityManager = $container->get(EntityManagerInterface::class);
 
@@ -28,6 +31,6 @@ trait ReloadsDoctrineFixtures
 
         $purger = new ORMPurger($entityManager);
         $executor = new ORMExecutor($entityManager, $purger);
-        $executor->execute($loader->getFixtures(), true);
+        $executor->execute($loader->getFixtures(), false);
     }
 }

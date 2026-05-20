@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Services;
 
 use App\Entity\Account;
+use App\Entity\Transaction;
 use App\Entity\User;
 use App\Message\TransactionSucceededMessage;
 use App\Repository\AccountRepository;
@@ -37,7 +38,14 @@ final class TransactionServiceTest extends TestCase
         $entityManager->method('getConnection')->willReturn($connection);
         $entityManager->method('find')->willReturn($to);
         $entityManager->expects(self::once())->method('flush');
-        $entityManager->expects(self::atLeastOnce())->method('persist');
+        $entityManager->expects(self::atLeastOnce())->method('persist')->willReturnCallback(
+            static function (object $entity): void {
+                if ($entity instanceof Transaction) {
+                    $reflection = new \ReflectionClass(Transaction::class);
+                    $reflection->getProperty('id')->setValue($entity, 99);
+                }
+            },
+        );
 
         $accountRepository = $this->createMock(AccountRepository::class);
         $accountRepository->method('findOneOwnedByUserIdForUpdate')

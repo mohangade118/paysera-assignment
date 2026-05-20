@@ -39,8 +39,18 @@ final class UserController extends AbstractController
             $this->entityManager->flush();
         }
 
+        $data = array_map(
+            static fn (User $user): array => [
+                'id' => $user->getId(),
+                'firstName' => $user->getFirstName(),
+                'lastName' => $user->getLastName(),
+                'email' => $user->getEmail(),
+            ],
+            $this->userRepository->findAll(),
+        );
+
         return $this->json([
-            'data' => $this->userRepository->findAll(),
+            'data' => $data,
             'message' => 'users listing',
         ]);
     }

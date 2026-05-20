@@ -70,7 +70,7 @@ final class RequestLifecycleSubscriberTest extends TestCase
     {
         $request = Request::create('/api/health');
         $request->attributes->set(RequestLifecycleSubscriber::REQUEST_ID_ATTR, 'req-1');
-        $request->attributes->set(RequestLifecycleSubscriber::START_HRTIME_ATTR, hrtime(true));
+        $request->attributes->set('_request_start_hrtime', hrtime(true));
         $response = new Response('', 200);
         $kernel = $this->createMock(HttpKernelInterface::class);
         $event = new TerminateEvent($kernel, $request, $response);

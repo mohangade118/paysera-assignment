@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\RateLimiter\LimiterInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\RateLimiter\RateLimit;
 
@@ -28,7 +29,7 @@ final class ApiRateLimitSubscriberTest extends TestCase
         $limit->method('isAccepted')->willReturn(false);
         $limit->method('getRetryAfter')->willReturn(new \DateTimeImmutable('+60 seconds'));
 
-        $limiter = $this->createMock(\Symfony\Component\RateLimiter\RateLimiterInterface::class);
+        $limiter = $this->createMock(LimiterInterface::class);
         $limiter->method('consume')->willReturn($limit);
 
         $factory = $this->createMock(RateLimiterFactoryInterface::class);
