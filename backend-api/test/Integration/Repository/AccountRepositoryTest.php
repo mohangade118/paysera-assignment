@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Repository;
 
 use App\DataFixtures\AccountFixtures;
-use App\DataFixtures\UserFixtures;
+use App\Entity\Account;
 use App\Entity\User;
 use App\Repository\AccountRepository;
-use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
-use Doctrine\Common\DataFixtures\Loader;
-use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use App\Tests\Support\ReloadsDoctrineFixtures;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Exercises Doctrine queries and IDENTITY(...) ownership filters on AccountRepository.
@@ -20,7 +18,11 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  */
 final class AccountRepositoryTest extends KernelTestCase
 {
+    use ReloadsDoctrineFixtures;
+
     private AccountRepository $accounts;
+
+    private EntityManagerInterface $em;
 
     private User $userWithAccountA;
 
@@ -33,13 +35,13 @@ final class AccountRepositoryTest extends KernelTestCase
         self::bootKernel();
         $container = static::getContainer();
 
-        $this->reloadUserAndAccountFixtures();
+        $this->purgeAndLoadFixtures($container->get(AccountFixtures::class));
 
         $this->accounts = $container->get(AccountRepository::class);
+        $this->em = $container->get('doctrine')->getManager();
 
-        $em = $container->get('doctrine')->getManager();
-        $user1 = $em->getRepository(User::class)->findOneBy(['email' => 'mohangade118@gmail.com']);
-        $user2 = $em->getRepository(User::class)->findOneBy(['email' => 'mohangade08@gmail.com']);
+        $user1 = $this->em->getRepository(User::class)->findOneBy(['email' => 'mohangade118@gmail.com']);
+        $user2 = $this->em->getRepository(User::class)->findOneBy(['email' => 'mohangade08@gmail.com']);
         self::assertInstanceOf(User::class, $user1);
         self::assertInstanceOf(User::class, $user2);
 
@@ -84,9 +86,11 @@ final class AccountRepositoryTest extends KernelTestCase
 
     public function testFindOneOwnedByUserIdForUpdateReturnsAccountForMatchingOwner(): void
     {
-        $found = $this->accounts->findOneOwnedByUserIdForUpdate(
-            $this->accountOwnedByUserAId,
-            $this->userWithAccountA->getId()
+        $found = $this->em->wrapInTransaction(
+            fn (): ?Account => $this->accounts->findOneOwnedByUserIdForUpdate(
+                $this->accountOwnedByUserAId,
+                $this->userWithAccountA->getId()
+            )
         );
 
         self::assertNotNull($found);
@@ -95,27 +99,13 @@ final class AccountRepositoryTest extends KernelTestCase
 
     public function testFindOneOwnedByUserIdForUpdateReturnsNullWhenUserDoesNotOwnAccount(): void
     {
-        self::assertNull(
-            $this->accounts->findOneOwnedByUserIdForUpdate(
+        $found = $this->em->wrapInTransaction(
+            fn (): ?Account => $this->accounts->findOneOwnedByUserIdForUpdate(
                 $this->accountOwnedByUserAId,
                 $this->otherUser->getId()
             )
         );
-    }
 
-    private function reloadUserAndAccountFixtures(): void
-    {
-        $container = static::getContainer();
-        $em = $container->get('doctrine')->getManager();
-
-        $purger = new ORMPurger($em);
-        $purger->purge();
-
-        $loader = new Loader();
-        $loader->addFixture(new UserFixtures($container->get(UserPasswordHasherInterface::class)));
-        $loader->addFixture(new AccountFixtures());
-
-        $executor = new ORMExecutor($em);
-        $executor->execute($loader->getFixtures(), true);
+        self::assertNull($found);
     }
 }

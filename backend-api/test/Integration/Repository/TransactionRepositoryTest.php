@@ -5,18 +5,14 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Repository;
 
 use App\DataFixtures\AccountFixtures;
-use App\DataFixtures\UserFixtures;
 use App\Entity\Account;
 use App\Entity\Transaction;
 use App\Entity\User;
 use App\Repository\AccountRepository;
 use App\Repository\TransactionRepository;
-use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
+use App\Tests\Support\ReloadsDoctrineFixtures;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Common\DataFixtures\Loader;
-use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * TransactionRepository has no custom finder methods yet; tests cover container wiring,
@@ -26,6 +22,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  */
 final class TransactionRepositoryTest extends KernelTestCase
 {
+    use ReloadsDoctrineFixtures;
+
     private TransactionRepository $transactions;
 
     private EntityManagerInterface $em;
@@ -39,7 +37,7 @@ final class TransactionRepositoryTest extends KernelTestCase
         self::bootKernel();
         $container = static::getContainer();
 
-        $this->reloadUserAndAccountFixtures();
+        $this->purgeAndLoadFixtures($container->get(AccountFixtures::class));
 
         $this->transactions = $container->get(TransactionRepository::class);
         $this->em = $container->get('doctrine')->getManager();
@@ -95,21 +93,5 @@ final class TransactionRepositoryTest extends KernelTestCase
         self::assertSame('receipt-int-1', $loaded->getReceipt());
         self::assertSame($this->fromAccountForUser1->getId(), $loaded->getFromAccount()?->getId());
         self::assertSame($this->toAccountForUser2->getId(), $loaded->getToAccount()?->getId());
-    }
-
-    private function reloadUserAndAccountFixtures(): void
-    {
-        $container = static::getContainer();
-        $em = $container->get('doctrine')->getManager();
-
-        $purger = new ORMPurger($em);
-        $purger->purge();
-
-        $loader = new Loader();
-        $loader->addFixture(new UserFixtures($container->get(UserPasswordHasherInterface::class)));
-        $loader->addFixture(new AccountFixtures());
-
-        $executor = new ORMExecutor($em);
-        $executor->execute($loader->getFixtures(), true);
     }
 }
