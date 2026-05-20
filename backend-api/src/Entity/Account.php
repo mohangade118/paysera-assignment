@@ -21,9 +21,9 @@ class Account
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: Types::INTEGER)]
-    #[PHPStan\Attribute\Ignore(reason: 'Populated by Doctrine when the entity is first persisted.')]
+    /** @phpstan-ignore-next-line property.onlyRead */
     private int $id;
-
+    
     #[ORM\Column(name: 'balance', type: Types::FLOAT)]
     private float $balance;
 

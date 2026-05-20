@@ -21,8 +21,6 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         private readonly RateLimiterFactoryInterface $apiGlobalLimiter,
         #[Autowire(service: 'limiter.api_transaction_post')]
         private readonly RateLimiterFactoryInterface $transactionPostLimiter,
-        #[Autowire(service: 'limiter.api_test_email_post')]
-        private readonly RateLimiterFactoryInterface $testEmailPostLimiter,
         private readonly Security $security,
         private readonly LoggerInterface $logger,
     ) {
@@ -67,13 +65,13 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         }
 
         $retryAfter = $limit->getRetryAfter();
-        $retryAfterSeconds = $retryAfter ? max($retryAfter->getTimestamp() - time(), 0) : null;
+        $retryAfterSeconds = max($retryAfter->getTimestamp() - time(), 0);
 
         $this->logger->warning('api_rate_limit_exceeded', [
             'route' => $routeName,
             'method' => $method,
             'key' => $key,
-            'retry_after' => $retryAfter?->format(\DateTimeInterface::ATOM),
+            'retry_after' => $retryAfter->format(\DateTimeInterface::ATOM),
         ]);
 
         $responseBody = [
@@ -81,14 +79,8 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         ];
 
         $response = new JsonResponse($responseBody, 429);
-
-        if ($retryAfterSeconds !== null) {
-            $response->headers->set('Retry-After', (string) $retryAfterSeconds);
-        }
-
-        if ($retryAfter !== null) {
-            $response->headers->set('X-RateLimit-Reset', (string) $retryAfter->getTimestamp());
-        }
+        $response->headers->set('Retry-After', (string) $retryAfterSeconds);
+        $response->headers->set('X-RateLimit-Reset', (string) $retryAfter->getTimestamp());
 
         $event->setResponse($response);
     }

@@ -17,12 +17,11 @@ class Transaction
 {
     /**
      * Populated by Doctrine when the entity is first persisted.
-     *
-     * @phpstan-ignore property.onlyRead
      */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: "id", type: Types::INTEGER)]
+    /** @phpstan-ignore-next-line property.onlyRead */
     private int $id;
 
     #[ORM\Column(name: "amount", type: Types::FLOAT)]
