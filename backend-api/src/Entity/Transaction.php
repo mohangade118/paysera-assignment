@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Repository\TransactionRepository;
-use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TransactionRepository::class)]
-#[ORM\Table(name: "transactions")]
-#[ORM\Index(name: "idx_transaction_from_ac_id", columns: ["from_account_id"])]
-#[ORM\Index(name: "idx_transaction_to_ac_id", columns: ["to_account_id"])]
+#[ORM\Table(name: 'transactions')]
+#[ORM\Index(name: 'idx_transaction_from_ac_id', columns: ['from_account_id'])]
+#[ORM\Index(name: 'idx_transaction_to_ac_id', columns: ['to_account_id'])]
 class Transaction
 {
     /**
@@ -20,14 +19,14 @@ class Transaction
      */
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: "id", type: Types::INTEGER)]
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
     /** @phpstan-ignore-next-line property.onlyRead */
     private int $id;
 
-    #[ORM\Column(name: "amount", type: Types::FLOAT)]
+    #[ORM\Column(name: 'amount', type: Types::FLOAT)]
     private float $amount;
 
-    #[ORM\Column(name: "status", type: Types::TEXT, length: 25)]
+    #[ORM\Column(name: 'status', type: Types::TEXT, length: 25)]
     private string $status;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -45,7 +44,7 @@ class Transaction
     private Account $toAccount;
 
     #[ORM\Column(name: 'notifications_sent_at', type: Types::DATETIME_IMMUTABLE, nullable: true)]
-    private ?DateTimeImmutable $notificationsSentAt = null;
+    private ?\DateTimeImmutable $notificationsSentAt = null;
 
     public function getId(): ?int
     {
@@ -124,12 +123,12 @@ class Transaction
         return $this;
     }
 
-    public function getNotificationsSentAt(): ?DateTimeImmutable
+    public function getNotificationsSentAt(): ?\DateTimeImmutable
     {
         return $this->notificationsSentAt;
     }
 
-    public function setNotificationsSentAt(?DateTimeImmutable $notificationsSentAt): static
+    public function setNotificationsSentAt(?\DateTimeImmutable $notificationsSentAt): static
     {
         $this->notificationsSentAt = $notificationsSentAt;
 

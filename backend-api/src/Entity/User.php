@@ -14,8 +14,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: "users")]
-#[ORM\Index(name: "idx_users_email", columns: ["email"])]
+#[ORM\Table(name: 'users')]
+#[ORM\Index(name: 'idx_users_email', columns: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**

@@ -6,13 +6,13 @@ namespace App\EventSubscriber;
 
 use App\Entity\User;
 use Psr\Log\LoggerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
-use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class ApiRateLimitSubscriber implements EventSubscriberInterface
 {
@@ -48,7 +48,7 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         }
 
         $routeName = (string) $request->attributes->get('_route', '');
-        if ($routeName === '') {
+        if ('' === $routeName) {
             return;
         }
 
@@ -88,7 +88,7 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
     private function resolveLimiterFactory(string $routeName, string $method): RateLimiterFactoryInterface
     {
         // Specific per-endpoint limits first
-        if ($routeName === 'app_transaction' && $method === 'POST') {
+        if ('app_transaction' === $routeName && 'POST' === $method) {
             return $this->transactionPostLimiter;
         }
 
@@ -101,12 +101,11 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         $user = $this->security->getUser();
 
         if ($user instanceof User) {
-            return 'user:' . $user->getId();
+            return 'user:'.$user->getId();
         }
 
-        $ip = $ipFromRequest !== '' ? $ipFromRequest : 'unknown';
+        $ip = '' !== $ipFromRequest ? $ipFromRequest : 'unknown';
 
-        return 'ip:' . $ip;
+        return 'ip:'.$ip;
     }
 }
-

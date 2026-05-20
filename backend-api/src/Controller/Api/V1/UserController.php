@@ -14,8 +14,6 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class UserController extends AbstractController
 {
-
-
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserRepositoryAlias $userRepository,
@@ -41,9 +39,10 @@ final class UserController extends AbstractController
             $this->entityManager->persist($user);
             $this->entityManager->flush();
         }
+
         return $this->json([
-           'data' => $this->userRepository->findAll(),
-           'message' => 'users listing'
+            'data' => $this->userRepository->findAll(),
+            'message' => 'users listing',
         ]);
     }
 }

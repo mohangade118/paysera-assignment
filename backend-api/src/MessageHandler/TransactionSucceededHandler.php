@@ -6,7 +6,6 @@ namespace App\MessageHandler;
 
 use App\Message\TransactionSucceededMessage;
 use App\Repository\TransactionRepository;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -34,7 +33,7 @@ final class TransactionSucceededHandler
         ]);
 
         $transaction = $this->transactionRepository->find($message->transactionId);
-        if ($transaction === null) {
+        if (null === $transaction) {
             $this->logger->warning('messenger.transaction_succeeded.transaction_missing', [
                 'transaction_id' => $message->transactionId,
             ]);
@@ -42,7 +41,7 @@ final class TransactionSucceededHandler
             return;
         }
 
-        if ($transaction->getNotificationsSentAt() !== null) {
+        if (null !== $transaction->getNotificationsSentAt()) {
             $this->logger->info('messenger.transaction_succeeded.already_notified', [
                 'transaction_id' => $message->transactionId,
             ]);
@@ -52,7 +51,7 @@ final class TransactionSucceededHandler
 
         $fromUser = $transaction->getFromAccount()?->getUser();
         $toUser = $transaction->getToAccount()?->getUser();
-        if ($fromUser === null || $toUser === null) {
+        if (null === $fromUser || null === $toUser) {
             $this->logger->warning('messenger.transaction_succeeded.user_missing', [
                 'transaction_id' => $message->transactionId,
                 'from_user_id' => $fromUser?->getId(),
@@ -70,7 +69,7 @@ final class TransactionSucceededHandler
         );
 
         try {
-            if ($fromUser->getEmail() !== '') {
+            if ('' !== $fromUser->getEmail()) {
                 $this->mailer->send((new Email())
                     ->from($this->fromEmail)
                     ->to($fromUser->getEmail())
@@ -78,7 +77,7 @@ final class TransactionSucceededHandler
                     ->text($body));
             }
 
-            if ($toUser->getEmail() !== '') {
+            if ('' !== $toUser->getEmail()) {
                 $this->mailer->send((new Email())
                     ->from($this->fromEmail)
                     ->to($toUser->getEmail())
@@ -86,7 +85,7 @@ final class TransactionSucceededHandler
                     ->text($body));
             }
 
-            $transaction->setNotificationsSentAt(new DateTimeImmutable());
+            $transaction->setNotificationsSentAt(new \DateTimeImmutable());
             $this->entityManager->flush();
 
             $this->logger->info('messenger.transaction_succeeded.notifications_sent', [

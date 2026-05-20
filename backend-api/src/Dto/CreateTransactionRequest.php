@@ -30,9 +30,8 @@ final class CreateTransactionRequest
     public ?string $receipt = null;
 
     #[Assert\Expression(
-        "this.from_account_id != this.to_account_id",
-        message: "from_account_id and to_account_id must be different"
+        'this.from_account_id != this.to_account_id',
+        message: 'from_account_id and to_account_id must be different'
     )]
     public bool $differentAccounts = true;
 }
-

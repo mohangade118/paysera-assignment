@@ -13,6 +13,4 @@ class AppFixtures extends Fixture
     {
 
     }
-
-
 }

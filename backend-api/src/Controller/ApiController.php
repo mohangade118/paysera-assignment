@@ -15,7 +15,7 @@ final class ApiController extends AbstractController
     {
 
         return $this->json([
-            'status' => 'ok'
+            'status' => 'ok',
         ]);
     }
 }

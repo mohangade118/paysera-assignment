@@ -21,7 +21,8 @@ class TransactionService
         private readonly EntityManagerInterface $entityManager,
         private readonly AccountRepository $accountRepository,
         private readonly MessageBusInterface $messageBus,
-    ) {}
+    ) {
+    }
 
     public function transfer(
         int $authenticatedUserId,
@@ -29,34 +30,33 @@ class TransactionService
         int $toAccountId,
         float $amount,
         ?string $note = null,
-        ?string $receipt = null
-    ): Transaction
-    {
+        ?string $receipt = null,
+    ): Transaction {
         $connection = $this->entityManager->getConnection();
         $connection->beginTransaction();
 
         try {
             /** @var Account|null $from */
             $from = $this->accountRepository->findOneOwnedByUserIdForUpdate($fromAccountId, $authenticatedUserId);
-            if ($from === null) {
+            if (null === $from) {
                 $fromAccountExists = $this->accountRepository->find($fromAccountId);
-                if ($fromAccountExists === null) {
+                if (null === $fromAccountExists) {
                     throw new NotFoundHttpException('from_account_id not found');
                 }
 
                 throw new AccessDeniedHttpException('from_account_id does not belong to the authenticated user');
             }
             /** @var Account|null $from */
-            if ($from->getStatus() !== 1) {
+            if (1 !== $from->getStatus()) {
                 throw new BadRequestHttpException('from_account_id is inactive');
             }
 
             /** @var Account|null $to */
             $to = $this->entityManager->find(Account::class, $toAccountId, LockMode::PESSIMISTIC_WRITE);
-            if ($to === null) {
+            if (null === $to) {
                 throw new NotFoundHttpException('to_account_id not found');
             }
-            if ($to->getStatus() !== 1) {
+            if (1 !== $to->getStatus()) {
                 throw new BadRequestHttpException('to_account_id is inactive');
             }
 

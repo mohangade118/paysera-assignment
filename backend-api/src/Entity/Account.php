@@ -23,11 +23,11 @@ class Account
     #[ORM\Column(name: 'id', type: Types::INTEGER)]
     /** @phpstan-ignore-next-line property.onlyRead */
     private int $id;
-    
+
     #[ORM\Column(name: 'balance', type: Types::FLOAT)]
     private float $balance;
 
-    #[ORM\Column(name: 'currency_type', type: Types::STRING ,length: 5)]
+    #[ORM\Column(name: 'currency_type', type: Types::STRING, length: 5)]
     private string $currencyType;
 
     #[ORM\Column(name: 'status', type: Types::INTEGER)]
