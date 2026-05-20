@@ -82,14 +82,12 @@ class TransactionService
 
             $connection->commit();
             $this->messageBus->dispatch(new TransactionSucceededMessage((int) $transaction->getId()));
-
         } catch (\Throwable $e) {
             if ($connection->isTransactionActive()) {
                 $connection->rollBack();
             }
             throw $e;
         }
-
 
         return $transaction;
     }

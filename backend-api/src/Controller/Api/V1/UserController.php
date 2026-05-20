@@ -24,7 +24,6 @@ final class UserController extends AbstractController
     #[Route('/api/v1/users', name: 'app_api_v1_user')]
     public function index(): Response
     {
-
         $email = 'mohangade111@gmail.com';
         if (null === $this->userRepository->findOneBy(['email' => $email])) {
             $user = new User();

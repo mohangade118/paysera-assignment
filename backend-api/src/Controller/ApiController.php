@@ -13,7 +13,6 @@ final class ApiController extends AbstractController
     #[Route('/api/health', name: 'api_health', methods: ['GET'])]
     public function index(): Response
     {
-
         return $this->json([
             'status' => 'ok',
         ]);
