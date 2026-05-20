@@ -22,26 +22,26 @@ final class ApiRateLimitSubscriberTest extends TestCase
     #[Test]
     public function returns429WhenLimitExceeded(): void
     {
-        $security = $this->createMock(Security::class);
+        $security = $this->createStub(Security::class);
         $security->method('getUser')->willReturn(null);
 
-        $limit = $this->createMock(RateLimit::class);
+        $limit = $this->createStub(RateLimit::class);
         $limit->method('isAccepted')->willReturn(false);
         $limit->method('getRetryAfter')->willReturn(new \DateTimeImmutable('+60 seconds'));
 
-        $limiter = $this->createMock(LimiterInterface::class);
+        $limiter = $this->createStub(LimiterInterface::class);
         $limiter->method('consume')->willReturn($limit);
 
-        $factory = $this->createMock(RateLimiterFactoryInterface::class);
+        $factory = $this->createStub(RateLimiterFactoryInterface::class);
         $factory->method('create')->willReturn($limiter);
 
-        $transactionFactory = $this->createMock(RateLimiterFactoryInterface::class);
+        $transactionFactory = $this->createStub(RateLimiterFactoryInterface::class);
 
         $subscriber = new ApiRateLimitSubscriber($factory, $transactionFactory, $security, new NullLogger());
 
         $request = Request::create('/api/v1/users');
         $request->attributes->set('_route', 'app_api_v1_user');
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $event = new RequestEvent($kernel, $request, Kernel::MAIN_REQUEST);
 
         $subscriber->onKernelRequest($event);

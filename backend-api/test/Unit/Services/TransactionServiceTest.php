@@ -29,16 +29,16 @@ final class TransactionServiceTest extends TestCase
         $from = $this->createAccount(10, $user, 100.0);
         $to = $this->createAccount(20, $this->createUser(2), 50.0);
 
-        $connection = $this->createMock(Connection::class);
+        $connection = $this->createStub(Connection::class);
         $connection->method('beginTransaction');
         $connection->method('commit');
         $connection->method('isTransactionActive')->willReturn(false);
 
         $entityManager = $this->createMock(EntityManagerInterface::class);
-        $entityManager->method('getConnection')->willReturn($connection);
-        $entityManager->method('find')->willReturn($to);
+        $entityManager->expects(self::atLeast(1))->method('getConnection')->willReturn($connection);
+        $entityManager->expects(self::once())->method('find')->willReturn($to);
         $entityManager->expects(self::once())->method('flush');
-        $entityManager->expects(self::atLeastOnce())->method('persist')->willReturnCallback(
+        $entityManager->expects(self::exactly(3))->method('persist')->willReturnCallback(
             static function (object $entity): void {
                 if ($entity instanceof Transaction) {
                     $reflection = new \ReflectionClass(Transaction::class);
@@ -47,7 +47,7 @@ final class TransactionServiceTest extends TestCase
             },
         );
 
-        $accountRepository = $this->createMock(AccountRepository::class);
+        $accountRepository = $this->createStub(AccountRepository::class);
         $accountRepository->method('findOneOwnedByUserIdForUpdate')
             ->with(10, 1)
             ->willReturn($from);
@@ -74,21 +74,21 @@ final class TransactionServiceTest extends TestCase
         $existingAccount = $this->createAccount(10, $otherUser, 100.0);
 
         $connection = $this->createMock(Connection::class);
-        $connection->method('beginTransaction');
-        $connection->method('isTransactionActive')->willReturn(true);
+        $connection->expects(self::once())->method('beginTransaction');
+        $connection->expects(self::once())->method('isTransactionActive')->willReturn(true);
         $connection->expects(self::once())->method('rollBack');
 
-        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager = $this->createStub(EntityManagerInterface::class);
         $entityManager->method('getConnection')->willReturn($connection);
 
-        $accountRepository = $this->createMock(AccountRepository::class);
+        $accountRepository = $this->createStub(AccountRepository::class);
         $accountRepository->method('findOneOwnedByUserIdForUpdate')->willReturn(null);
         $accountRepository->method('find')->with(10)->willReturn($existingAccount);
 
         $service = new TransactionService(
             $entityManager,
             $accountRepository,
-            $this->createMock(MessageBusInterface::class),
+            $this->createStub(MessageBusInterface::class),
         );
 
         $this->expectException(AccessDeniedHttpException::class);
@@ -99,21 +99,21 @@ final class TransactionServiceTest extends TestCase
     public function transferFailsWhenFromAccountNotFound(): void
     {
         $connection = $this->createMock(Connection::class);
-        $connection->method('beginTransaction');
-        $connection->method('isTransactionActive')->willReturn(true);
+        $connection->expects(self::once())->method('beginTransaction');
+        $connection->expects(self::once())->method('isTransactionActive')->willReturn(true);
         $connection->expects(self::once())->method('rollBack');
 
-        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager = $this->createStub(EntityManagerInterface::class);
         $entityManager->method('getConnection')->willReturn($connection);
 
-        $accountRepository = $this->createMock(AccountRepository::class);
+        $accountRepository = $this->createStub(AccountRepository::class);
         $accountRepository->method('findOneOwnedByUserIdForUpdate')->willReturn(null);
         $accountRepository->method('find')->willReturn(null);
 
         $service = new TransactionService(
             $entityManager,
             $accountRepository,
-            $this->createMock(MessageBusInterface::class),
+            $this->createStub(MessageBusInterface::class),
         );
 
         $this->expectException(NotFoundHttpException::class);
@@ -128,21 +128,21 @@ final class TransactionServiceTest extends TestCase
         $to = $this->createAccount(20, $this->createUser(2), 100.0);
 
         $connection = $this->createMock(Connection::class);
-        $connection->method('beginTransaction');
-        $connection->method('isTransactionActive')->willReturn(true);
+        $connection->expects(self::once())->method('beginTransaction');
+        $connection->expects(self::once())->method('isTransactionActive')->willReturn(true);
         $connection->expects(self::once())->method('rollBack');
 
-        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager = $this->createStub(EntityManagerInterface::class);
         $entityManager->method('getConnection')->willReturn($connection);
         $entityManager->method('find')->willReturn($to);
 
-        $accountRepository = $this->createMock(AccountRepository::class);
+        $accountRepository = $this->createStub(AccountRepository::class);
         $accountRepository->method('findOneOwnedByUserIdForUpdate')->willReturn($from);
 
         $service = new TransactionService(
             $entityManager,
             $accountRepository,
-            $this->createMock(MessageBusInterface::class),
+            $this->createStub(MessageBusInterface::class),
         );
 
         $this->expectException(BadRequestHttpException::class);

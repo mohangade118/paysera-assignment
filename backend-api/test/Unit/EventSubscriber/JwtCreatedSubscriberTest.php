@@ -38,7 +38,7 @@ final class JwtCreatedSubscriberTest extends TestCase
     #[Test]
     public function ignoresNonAppUsers(): void
     {
-        $otherUser = $this->createMock(UserInterface::class);
+        $otherUser = $this->createStub(UserInterface::class);
         $event = new JWTCreatedEvent(['sub' => '1'], $otherUser);
         $subscriber = new JwtCreatedSubscriber();
         $subscriber->onJwtCreated($event);

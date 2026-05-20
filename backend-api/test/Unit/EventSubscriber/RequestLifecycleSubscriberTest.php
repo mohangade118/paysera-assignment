@@ -29,7 +29,7 @@ final class RequestLifecycleSubscriberTest extends TestCase
     public function assignsRequestIdOnApiRequest(): void
     {
         $request = Request::create('/api/health');
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $event = new RequestEvent($kernel, $request, Kernel::MAIN_REQUEST);
 
         $this->subscriber->onKernelRequest($event);
@@ -45,7 +45,7 @@ final class RequestLifecycleSubscriberTest extends TestCase
         $request = Request::create('/api/health');
         $request->attributes->set(RequestLifecycleSubscriber::REQUEST_ID_ATTR, 'abc123');
         $response = new Response();
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $event = new ResponseEvent($kernel, $request, Kernel::MAIN_REQUEST, $response);
 
         $this->subscriber->onKernelResponse($event);
@@ -57,7 +57,7 @@ final class RequestLifecycleSubscriberTest extends TestCase
     public function ignoresNonApiPaths(): void
     {
         $request = Request::create('/index');
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $event = new RequestEvent($kernel, $request, Kernel::MAIN_REQUEST);
 
         $this->subscriber->onKernelRequest($event);
@@ -72,7 +72,7 @@ final class RequestLifecycleSubscriberTest extends TestCase
         $request->attributes->set(RequestLifecycleSubscriber::REQUEST_ID_ATTR, 'req-1');
         $request->attributes->set('_request_start_hrtime', hrtime(true));
         $response = new Response('', 200);
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $event = new TerminateEvent($kernel, $request, $response);
 
         $this->subscriber->onKernelTerminate($event);

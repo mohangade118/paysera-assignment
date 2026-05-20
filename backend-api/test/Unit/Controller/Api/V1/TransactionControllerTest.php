@@ -57,7 +57,7 @@ final class TransactionControllerTest extends TestCase
     #[Test]
     public function addThrowsWhenUserNotAuthenticated(): void
     {
-        $transactionService = $this->createMock(TransactionService::class);
+        $transactionService = $this->createStub(TransactionService::class);
         $controller = $this->createController($transactionService, null);
 
         $dto = new CreateTransactionRequest();

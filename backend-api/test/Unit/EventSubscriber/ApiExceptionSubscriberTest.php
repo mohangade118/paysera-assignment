@@ -29,7 +29,7 @@ final class ApiExceptionSubscriberTest extends TestCase
     public function mapsHttpExceptionToJsonForApiRoutes(): void
     {
         $request = Request::create('/api/v1/users');
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $event = new ExceptionEvent(
             $kernel,
             $request,
@@ -52,7 +52,7 @@ final class ApiExceptionSubscriberTest extends TestCase
     public function ignoresNonApiRoutes(): void
     {
         $request = Request::create('/some-page');
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $event = new ExceptionEvent(
             $kernel,
             $request,
@@ -72,7 +72,7 @@ final class ApiExceptionSubscriberTest extends TestCase
             new ConstraintViolation('required', '', [], null, 'from_account_id', null),
         ]);
         $request = Request::create('/api/v1/transaction');
-        $kernel = $this->createMock(HttpKernelInterface::class);
+        $kernel = $this->createStub(HttpKernelInterface::class);
         $event = new ExceptionEvent(
             $kernel,
             $request,
