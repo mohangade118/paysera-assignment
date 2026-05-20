@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\AccountRepository;
@@ -13,15 +15,19 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'idx_accounts_user_id', columns: ['user_id'])]
 class Account
 {
+    /**
+     * Populated by Doctrine when the entity is first persisted.
+     */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    /** @phpstan-ignore-next-line property.onlyRead */
     private int $id;
 
     #[ORM\Column(name: 'balance', type: Types::FLOAT)]
     private float $balance;
 
-    #[ORM\Column(name: 'currency_type', type: Types::STRING ,length: 5)]
+    #[ORM\Column(name: 'currency_type', type: Types::STRING, length: 5)]
     private string $currencyType;
 
     #[ORM\Column(name: 'status', type: Types::INTEGER)]

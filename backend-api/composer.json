@@ -63,6 +63,9 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
         "messenger:consume:async": "php bin/console messenger:consume async -vv",
+        "phpstan": "phpstan analyse",
+        "cs-check": "php-cs-fixer fix --dry-run --allow-risky=yes",
+        "cs-fix": "php-cs-fixer fix --allow-risky=yes",
         "post-install-cmd": [
             "@auto-scripts"
         ],
@@ -83,6 +86,7 @@
         "doctrine/doctrine-fixtures-bundle": "^4.3",
         "friendsofphp/php-cs-fixer": "^3.95",
         "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-symfony": "^2.0",
         "symfony/debug-bundle": "7.4.*",
         "symfony/maker-bundle": "^1.67",
         "symfony/stopwatch": "7.4.*",

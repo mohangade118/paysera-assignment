@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSubscriber;
 
 use Psr\Log\LoggerInterface;
@@ -43,7 +45,7 @@ final class RequestLifecycleSubscriber implements EventSubscriberInterface
         }
 
         $existing = $request->headers->get('X-Request-Id');
-        $requestId = \is_string($existing) && $existing !== '' ? $existing : bin2hex(random_bytes(8));
+        $requestId = \is_string($existing) && '' !== $existing ? $existing : bin2hex(random_bytes(8));
         $request->attributes->set(self::REQUEST_ID_ATTR, $requestId);
         $request->attributes->set(self::START_HRTIME_ATTR, hrtime(true));
 
@@ -67,7 +69,7 @@ final class RequestLifecycleSubscriber implements EventSubscriberInterface
         }
 
         $requestId = $request->attributes->get(self::REQUEST_ID_ATTR);
-        if (\is_string($requestId) && $requestId !== '') {
+        if (\is_string($requestId) && '' !== $requestId) {
             $event->getResponse()->headers->set('X-Request-Id', $requestId);
         }
     }
@@ -80,7 +82,7 @@ final class RequestLifecycleSubscriber implements EventSubscriberInterface
         }
 
         $requestId = $request->attributes->get(self::REQUEST_ID_ATTR);
-        if (!\is_string($requestId) || $requestId === '') {
+        if (!\is_string($requestId) || '' === $requestId) {
             return;
         }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller\Api\V1;
 
 use App\Entity\User;
@@ -12,8 +14,6 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class UserController extends AbstractController
 {
-
-
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserRepositoryAlias $userRepository,
@@ -24,7 +24,6 @@ final class UserController extends AbstractController
     #[Route('/api/v1/users', name: 'app_api_v1_user')]
     public function index(): Response
     {
-
         $email = 'mohangade111@gmail.com';
         if (null === $this->userRepository->findOneBy(['email' => $email])) {
             $user = new User();
@@ -39,9 +38,10 @@ final class UserController extends AbstractController
             $this->entityManager->persist($user);
             $this->entityManager->flush();
         }
+
         return $this->json([
-           'data' => $this->userRepository->findAll(),
-           'message' => 'users listing'
+            'data' => $this->userRepository->findAll(),
+            'message' => 'users listing',
         ]);
     }
 }

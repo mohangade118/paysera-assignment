@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DataFixtures;
 
 use App\Entity\Account;
@@ -8,11 +10,8 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-
 class AccountFixtures extends Fixture implements DependentFixtureInterface
 {
-
-
     public function load(ObjectManager $manager): void
     {
         $user1 = $this->getReference(UserFixtures::user1, User::class);

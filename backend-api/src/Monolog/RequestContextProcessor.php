@@ -26,9 +26,9 @@ final class RequestContextProcessor
     public function __invoke(LogRecord $record): LogRecord
     {
         $request = $this->requestStack->getCurrentRequest();
-        if ($request !== null) {
+        if (null !== $request) {
             $requestId = $request->attributes->get(RequestLifecycleSubscriber::REQUEST_ID_ATTR);
-            if (\is_string($requestId) && $requestId !== '') {
+            if (\is_string($requestId) && '' !== $requestId) {
                 $record->extra['request_id'] = $requestId;
             }
             $record->extra['http_method'] = $request->getMethod();

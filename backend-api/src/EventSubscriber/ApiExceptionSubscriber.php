@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -67,4 +69,3 @@ final class ApiExceptionSubscriber implements EventSubscriberInterface
         $event->setResponse(new JsonResponse($payload, $statusCode));
     }
 }
-

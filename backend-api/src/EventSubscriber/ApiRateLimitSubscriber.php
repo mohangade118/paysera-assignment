@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\EventSubscriber;
 
 use App\Entity\User;
 use Psr\Log\LoggerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
-use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final class ApiRateLimitSubscriber implements EventSubscriberInterface
 {
@@ -19,8 +21,6 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         private readonly RateLimiterFactoryInterface $apiGlobalLimiter,
         #[Autowire(service: 'limiter.api_transaction_post')]
         private readonly RateLimiterFactoryInterface $transactionPostLimiter,
-        #[Autowire(service: 'limiter.api_test_email_post')]
-        private readonly RateLimiterFactoryInterface $testEmailPostLimiter,
         private readonly Security $security,
         private readonly LoggerInterface $logger,
     ) {
@@ -48,7 +48,7 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         }
 
         $routeName = (string) $request->attributes->get('_route', '');
-        if ($routeName === '') {
+        if ('' === $routeName) {
             return;
         }
 
@@ -65,13 +65,13 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         }
 
         $retryAfter = $limit->getRetryAfter();
-        $retryAfterSeconds = $retryAfter ? max($retryAfter->getTimestamp() - time(), 0) : null;
+        $retryAfterSeconds = max($retryAfter->getTimestamp() - time(), 0);
 
         $this->logger->warning('api_rate_limit_exceeded', [
             'route' => $routeName,
             'method' => $method,
             'key' => $key,
-            'retry_after' => $retryAfter?->format(\DateTimeInterface::ATOM),
+            'retry_after' => $retryAfter->format(\DateTimeInterface::ATOM),
         ]);
 
         $responseBody = [
@@ -79,14 +79,8 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         ];
 
         $response = new JsonResponse($responseBody, 429);
-
-        if ($retryAfterSeconds !== null) {
-            $response->headers->set('Retry-After', (string) $retryAfterSeconds);
-        }
-
-        if ($retryAfter !== null) {
-            $response->headers->set('X-RateLimit-Reset', (string) $retryAfter->getTimestamp());
-        }
+        $response->headers->set('Retry-After', (string) $retryAfterSeconds);
+        $response->headers->set('X-RateLimit-Reset', (string) $retryAfter->getTimestamp());
 
         $event->setResponse($response);
     }
@@ -94,7 +88,7 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
     private function resolveLimiterFactory(string $routeName, string $method): RateLimiterFactoryInterface
     {
         // Specific per-endpoint limits first
-        if ($routeName === 'app_transaction' && $method === 'POST') {
+        if ('app_transaction' === $routeName && 'POST' === $method) {
             return $this->transactionPostLimiter;
         }
 
@@ -107,12 +101,11 @@ final class ApiRateLimitSubscriber implements EventSubscriberInterface
         $user = $this->security->getUser();
 
         if ($user instanceof User) {
-            return 'user:' . $user->getId();
+            return 'user:'.$user->getId();
         }
 
-        $ip = $ipFromRequest !== '' ? $ipFromRequest : 'unknown';
+        $ip = '' !== $ipFromRequest ? $ipFromRequest : 'unknown';
 
-        return 'ip:' . $ip;
+        return 'ip:'.$ip;
     }
 }
-

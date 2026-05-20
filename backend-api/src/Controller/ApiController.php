@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,9 +13,8 @@ final class ApiController extends AbstractController
     #[Route('/api/health', name: 'api_health', methods: ['GET'])]
     public function index(): Response
     {
-
         return $this->json([
-            'status' => 'ok'
+            'status' => 'ok',
         ]);
     }
 }
