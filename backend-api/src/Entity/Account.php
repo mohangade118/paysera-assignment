@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\AccountRepository;
@@ -13,9 +15,13 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'idx_accounts_user_id', columns: ['user_id'])]
 class Account
 {
+    /**
+     * Populated by Doctrine when the entity is first persisted.
+     */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[PHPStan\Attribute\Ignore(reason: 'Populated by Doctrine when the entity is first persisted.')]
     private int $id;
 
     #[ORM\Column(name: 'balance', type: Types::FLOAT)]

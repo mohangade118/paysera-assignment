@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DataFixtures;
 
 use App\Entity\User;
@@ -18,6 +20,7 @@ class UserFixtures extends Fixture
     ) {
     }
 
+    /** @return list<string> */
     public static function getGroups(): array
     {
         return ['user_group'];

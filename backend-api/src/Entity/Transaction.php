@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Repository\TransactionRepository;
@@ -13,6 +15,11 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: "idx_transaction_to_ac_id", columns: ["to_account_id"])]
 class Transaction
 {
+    /**
+     * Populated by Doctrine when the entity is first persisted.
+     *
+     * @phpstan-ignore property.onlyRead
+     */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: "id", type: Types::INTEGER)]
