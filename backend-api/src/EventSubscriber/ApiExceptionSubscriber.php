@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
@@ -39,6 +41,12 @@ final class ApiExceptionSubscriber implements EventSubscriberInterface
         if ($e instanceof HttpExceptionInterface) {
             $statusCode = $e->getStatusCode();
             $message = $e->getMessage() ?: JsonResponse::$statusTexts[$statusCode] ?? 'Error';
+        } elseif ($e instanceof AuthenticationException) {
+            $statusCode = 401;
+            $message = $e->getMessage() ?: 'Unauthorized';
+        } elseif ($e instanceof AccessDeniedException) {
+            $statusCode = 403;
+            $message = $e->getMessage() ?: 'Forbidden';
         } elseif ($e instanceof ValidationFailedException) {
             $statusCode = 400;
             $message = 'Validation failed';
