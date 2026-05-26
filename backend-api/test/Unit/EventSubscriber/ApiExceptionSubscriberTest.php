@@ -28,7 +28,7 @@ final class ApiExceptionSubscriberTest extends TestCase
     #[Test]
     public function mapsHttpExceptionToJsonForApiRoutes(): void
     {
-        $request = Request::create('/api/v1/users');
+        $request = Request::create('/api/v1/users/1');
         $kernel = $this->createStub(HttpKernelInterface::class);
         $event = new ExceptionEvent(
             $kernel,

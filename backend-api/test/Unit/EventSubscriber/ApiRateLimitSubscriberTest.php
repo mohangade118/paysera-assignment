@@ -39,7 +39,7 @@ final class ApiRateLimitSubscriberTest extends TestCase
 
         $subscriber = new ApiRateLimitSubscriber($factory, $transactionFactory, $security, new NullLogger());
 
-        $request = Request::create('/api/v1/users');
+        $request = Request::create('/api/v1/users/1');
         $request->attributes->set('_route', 'app_api_v1_user');
         $kernel = $this->createStub(HttpKernelInterface::class);
         $event = new RequestEvent($kernel, $request, Kernel::MAIN_REQUEST);

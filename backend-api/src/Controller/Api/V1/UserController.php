@@ -4,54 +4,32 @@ declare(strict_types=1);
 
 namespace App\Controller\Api\V1;
 
-use App\Entity\User;
-use App\Repository\UserRepository as UserRepositoryAlias;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\UserRepository;
+use App\Transformer\UserTransformer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class UserController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly UserRepositoryAlias $userRepository,
-        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly UserRepository $userRepository,
+        private readonly UserTransformer $userTransformer,
     ) {
     }
 
-    #[Route('/api/v1/users', name: 'app_api_v1_user')]
-    public function index(): Response
+    #[Route('/api/v1/users/{id}', name: 'app_api_v1_user_show', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function show(int $id): Response
     {
-        $email = 'mohangade111@gmail.com';
-        if (null === $this->userRepository->findOneBy(['email' => $email])) {
-            $user = new User();
-            $user->setFirstName('Mohan')
-                ->setLastName('Gade')
-                ->setEmail($email)
-                ->setContactNo('9001112233')
-                ->setPassword($this->passwordHasher->hashPassword($user, 'password'))
-                ->setCreatedAt(new \DateTimeImmutable())
-                ->setUpdatedAt(new \DateTimeImmutable());
-
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
+        $user = $this->userRepository->findActiveUserById($id);
+        if (null === $user) {
+            throw new NotFoundHttpException('User not found');
         }
 
-        $data = array_map(
-            static fn (User $user): array => [
-                'id' => $user->getId(),
-                'firstName' => $user->getFirstName(),
-                'lastName' => $user->getLastName(),
-                'email' => $user->getEmail(),
-            ],
-            $this->userRepository->findAll(),
-        );
-
         return $this->json([
-            'data' => $data,
-            'message' => 'users listing',
+            'data' => $this->userTransformer->transform($user),
+            'message' => 'user details',
         ]);
     }
 }

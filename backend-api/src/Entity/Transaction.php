@@ -14,9 +14,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'idx_transaction_to_ac_id', columns: ['to_account_id'])]
 class Transaction
 {
-    /**
-     * Populated by Doctrine when the entity is first persisted.
-     */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: Types::INTEGER)]

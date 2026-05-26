@@ -1,0 +1,156 @@
+<mxfile host="app.diagrams.net" agent="paysera-assignment">
+  <diagram id="system-components" name="System Components">
+    <mxGraphModel dx="1085" dy="465" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontStyle=1" value="Paysera Fund Transfer API — System Components" vertex="1">
+          <mxGeometry height="40" width="760" x="320" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="client" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1" value="HTTP Client" vertex="1">
+          <mxGeometry height="50" width="160" x="600" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="compose" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;container=1;collapsible=0;" value="Docker Compose Stack" vertex="1">
+          <mxGeometry height="820" width="1320" x="40" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_layer" parent="compose" style="swimlane;whiteSpace=wrap;html=1;startSize=26;fillColor=#e1d5e7;strokeColor=#9673a6;container=1;collapsible=0;" value="Edge Layer" vertex="1">
+          <mxGeometry height="100" width="1280" x="20" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="nginx" parent="edge_layer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="nginx :8080" vertex="1">
+          <mxGeometry height="50" width="140" x="560" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="symfony" parent="compose" style="swimlane;whiteSpace=wrap;html=1;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;container=1;collapsible=0;" value="Symfony Application — PHP 8.3 FPM" vertex="1">
+          <mxGeometry height="420" width="760" x="20" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="controllers" parent="symfony" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontStyle=1" value="API Controllers" vertex="1">
+          <mxGeometry height="50" width="160" x="280" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="dto" parent="symfony" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" value="DTO and Validator" vertex="1">
+          <mxGeometry height="45" width="150" x="80" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="security" parent="symfony" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" value="JWT Security" vertex="1">
+          <mxGeometry height="45" width="150" x="200" y="185" as="geometry" />
+        </mxCell>
+        <mxCell id="txservice" parent="symfony" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontStyle=1" value="TransactionService" vertex="1">
+          <mxGeometry height="55" width="170" x="480" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="subscribers" parent="symfony" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" value="Event Subscribers" vertex="1">
+          <mxGeometry height="45" width="150" x="80" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="appcache" parent="symfony" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" value="Symfony Cache" vertex="1">
+          <mxGeometry height="45" width="150" x="80" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="messenger" parent="symfony" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" value="Symfony Messenger" vertex="1">
+          <mxGeometry height="45" width="160" x="280" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="mailer" parent="symfony" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" value="Mailer" vertex="1">
+          <mxGeometry height="45" width="120" x="500" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ctrl_dto" edge="1" parent="symfony" source="controllers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="dto">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ctrl_sec" edge="1" parent="symfony" source="controllers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="security">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ctrl_tx" edge="1" parent="symfony" source="controllers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="txservice">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_tx_msg" edge="1" parent="symfony" source="txservice" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="messenger">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_tx_msg_lbl" connectable="0" parent="e_tx_msg" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="TransactionSucceededMessage" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="1" as="geometry">
+            <mxPoint y="10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="data_layer" parent="compose" style="swimlane;whiteSpace=wrap;html=1;startSize=30;fillColor=#ffe6cc;strokeColor=#d79b00;container=1;collapsible=0;" value="Data and Messaging" vertex="1">
+          <mxGeometry height="200" width="480" x="800" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="mysql" parent="data_layer" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#ffffff;strokeColor=#d79b00;" value="MySQL 8" vertex="1">
+          <mxGeometry height="80" width="100" x="40" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="redis" parent="data_layer" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#ffffff;strokeColor=#d79b00;" value="Redis" vertex="1">
+          <mxGeometry height="80" width="100" x="190" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="rabbitmq" parent="data_layer" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#ffffff;strokeColor=#d79b00;" value="RabbitMQ" vertex="1">
+          <mxGeometry height="70" width="120" x="330" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="worker" parent="compose" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1" value="Messenger Consumer&#xa;(async worker)" vertex="1">
+          <mxGeometry height="60" width="200" x="860" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="e_sub_pipe" edge="1" parent="compose" source="subscribers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=8 8;endArrow=classic;endFill=1;" target="nginx">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="130" y="120" />
+              <mxPoint x="630" y="120" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_sub_lbl" connectable="0" parent="e_sub_pipe" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="request pipeline" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="1" as="geometry">
+            <mxPoint x="20" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_tx_db" edge="1" parent="compose" source="txservice" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="mysql">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_tx_db_lbl" connectable="0" parent="e_tx_db" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" value="BEGIN / locks / debit / credit / COMMIT" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="1" as="geometry">
+            <mxPoint y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_cache_redis" edge="1" parent="compose" source="appcache" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="redis">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cache_lbl" connectable="0" parent="e_cache_redis" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="cache.app" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_msg_rmq" edge="1" parent="compose" source="messenger" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="rabbitmq">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_msg_rmq_lbl" connectable="0" parent="e_msg_rmq" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="AMQP" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_rmq_worker" edge="1" parent="compose" source="rabbitmq" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="worker">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_worker_mailer" edge="1" parent="compose" source="worker" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="mailer">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="960" y="390" />
+              <mxPoint x="600" y="390" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_worker_db" edge="1" parent="compose" source="worker" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="mysql">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_worker_db_lbl" connectable="0" parent="e_worker_db" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="notifications" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_http" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="nginx">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_http_lbl" connectable="0" parent="e_http" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="HTTP" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_fcgi" edge="1" parent="1" source="nginx" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;" target="controllers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_fcgi_lbl" connectable="0" parent="e_fcgi" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="FastCGI" vertex="1">
+          <mxGeometry relative="1" x="-0.1" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
