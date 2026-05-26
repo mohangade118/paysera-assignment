@@ -14,7 +14,7 @@ final class UserTransformer
     public function transform(User $user): array
     {
         return [
-            'id' => $user->getId(),
+            'userId' => $user->getId(),
             'firstName' => $user->getFirstName(),
             'lastName' => $user->getLastName(),
             'email' => $user->getEmail(),

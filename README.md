@@ -116,6 +116,7 @@ X-Request-Id: <uuid-or-custom-id>
 | `POST` | `/api/login` | Public | Issue JWT (`email`, `password`) |
 | `POST` | `/api/v1/transaction` | JWT | Transfer funds |
 | `GET` | `/api/v1/users/{id}` | JWT | Get user by ID |
+| `GET` | `/api/v1/users/{id}/accounts` | JWT | List accounts for user ID (own ID only) |
 
 ### `GET /api/health`
 
@@ -212,6 +213,29 @@ Login is throttled: **2 attempts per 15 minutes** per identity (disabled in `tes
 ```
 
 **Response 404** when the user does not exist or is soft-deleted.
+
+### `GET /api/v1/users/{id}/accounts`
+
+Returns all accounts belonging to the user `{id}`. The authenticated user may only request their own ID (`{id}` must match the JWT subject’s user ID).
+
+**Response 200:**
+
+```json
+{
+  "data": [
+    { "id": 1, "balance": 100, "currencyType": "INR", "status": 1 },
+    { "id": 2, "balance": 100, "currencyType": "INR", "status": 1 }
+  ],
+  "message": "account details"
+}
+```
+
+After fixtures, user 1 (`mohangade118@gmail.com`) has **two** accounts; user 2 has **one**.
+
+| Status | When |
+|--------|------|
+| 403 | Missing JWT, or `{id}` is not the authenticated user’s ID |
+| 404 | User `{id}` does not exist or is soft-deleted |
 
 ### Example: full transfer with curl
 

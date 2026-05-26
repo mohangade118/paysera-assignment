@@ -57,4 +57,23 @@ final class AccountRepositoryTest extends KernelTestCase
 
         self::assertNull($found);
     }
+
+    #[Test]
+    public function findByUserIdReturnsAllAccountsForUser(): void
+    {
+        self::bootKernel();
+        $this->purgeAndLoadFixtures([UserFixtures::class, AccountFixtures::class]);
+
+        $entityManager = static::getContainer()->get('doctrine')->getManager();
+        $owner = $entityManager->getRepository(User::class)->findOneBy(['email' => 'mohangade118@gmail.com']);
+        self::assertInstanceOf(User::class, $owner);
+
+        $repository = static::getContainer()->get(AccountRepository::class);
+        $accounts = $repository->findByUserId($owner->getId());
+
+        self::assertCount(2, $accounts);
+        foreach ($accounts as $account) {
+            self::assertSame($owner->getId(), $account->getUser()?->getId());
+        }
+    }
 }
