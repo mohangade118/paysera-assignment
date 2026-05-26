@@ -19,6 +19,22 @@ class AccountRepository extends ServiceEntityRepository
         parent::__construct($registry, Account::class);
     }
 
+    /**
+     * @return list<Account>
+     */
+    public function findByUserId(int $userId): array
+    {
+        /** @var list<Account> $accounts */
+        $accounts = $this->createQueryBuilder('a')
+            ->andWhere('IDENTITY(a.user) = :userId')
+            ->setParameter('userId', $userId)
+            ->orderBy('a.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $accounts;
+    }
+
     public function findOneOwnedByUserId(int $accountId, int $userId): ?Account
     {
         /** @var Account|null $account */
