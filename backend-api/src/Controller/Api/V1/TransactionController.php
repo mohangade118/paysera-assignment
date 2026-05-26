@@ -22,7 +22,7 @@ final class TransactionController extends AbstractController
     ) {
     }
 
-    #[Route('/api/v1/transaction', name: 'app_transaction', methods: ['POST'])]
+    #[Route('/api/v1/transactions', name: 'app_transaction', methods: ['POST'])]
     public function add(#[MapRequestPayload] CreateTransactionRequest $dto): Response
     {
         // At this point Symfony has already:
