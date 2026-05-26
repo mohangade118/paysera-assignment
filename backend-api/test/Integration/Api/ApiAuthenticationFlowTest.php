@@ -24,11 +24,13 @@ final class ApiAuthenticationFlowTest extends WebTestCase
 
         $token = $this->loginAndGetToken($client, 'mohangade118@gmail.com');
 
-        $this->requestAuthenticated($client, 'GET', '/api/v1/users', $token);
+        $this->requestAuthenticated($client, 'GET', '/api/v1/users/1', $token);
 
         self::assertResponseIsSuccessful();
         $payload = json_decode($client->getResponse()->getContent() ?: '', true);
-        self::assertSame('users listing', $payload['message']);
+        self::assertSame('user details', $payload['message']);
+        self::assertSame(1, $payload['data']['id']);
+        self::assertSame('mohangade118@gmail.com', $payload['data']['email']);
     }
 
     #[Test]
@@ -56,7 +58,7 @@ final class ApiAuthenticationFlowTest extends WebTestCase
         $client = static::createClient();
         $this->purgeAndLoadFixtures([UserFixtures::class, AccountFixtures::class]);
 
-        $client->request('GET', '/api/v1/users');
+        $client->request('GET', '/api/v1/users/1');
 
         self::assertResponseStatusCodeSame(403);
     }
@@ -69,7 +71,7 @@ final class ApiAuthenticationFlowTest extends WebTestCase
 
         $client->request(
             'GET',
-            '/api/v1/users',
+            '/api/v1/users/1',
             server: ['HTTP_AUTHORIZATION' => 'Bearer invalid-token'],
         );
 
@@ -83,7 +85,7 @@ final class ApiAuthenticationFlowTest extends WebTestCase
         $this->purgeAndLoadFixtures([UserFixtures::class, AccountFixtures::class]);
 
         $token = $this->loginAndGetToken($client, 'mohangade118@gmail.com');
-        $this->requestAuthenticated($client, 'GET', '/api/v1/users', $token);
+        $this->requestAuthenticated($client, 'GET', '/api/v1/users/1', $token);
 
         self::assertResponseIsSuccessful();
     }

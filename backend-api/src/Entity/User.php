@@ -18,9 +18,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Index(name: 'idx_users_email', columns: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    /**
-     * Populated by Doctrine when the entity is first persisted.
-     */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: Types::INTEGER)]
