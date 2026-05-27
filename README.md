@@ -58,11 +58,11 @@ Application code lives in `[backend-api/](backend-api/)`.
 
 ## Architecture
 
-System architecture
+![System architecture](paysera-architecture.png)
+
 
 ### Data model
 
-![DB] DATABASE DIAGRAM
 
 ---
 
