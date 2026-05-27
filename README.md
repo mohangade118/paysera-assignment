@@ -62,7 +62,7 @@ Application code lives in `[backend-api/](backend-api/)`.
 
 
 ### Data model
-
+![DB](DB.png)
 
 ---
 
