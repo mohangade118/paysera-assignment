@@ -8,11 +8,12 @@ use App\Controller\Api\V1\TransactionController;
 use App\Dto\CreateTransactionRequest;
 use App\Entity\Transaction;
 use App\Entity\User;
+use App\Services\IdempotencyService;
 use App\Services\TransactionService;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -40,38 +41,56 @@ final class TransactionControllerTest extends TestCase
             ->with($user->getId(), 1, 2, 10.0, 'note', null)
             ->willReturn($transaction);
 
-        $controller = $this->createController($transactionService, $user);
+        $idempotencyService = $this->createMock(IdempotencyService::class);
+        $idempotencyService->expects(self::once())
+            ->method('execute')
+            ->willReturnCallback(static fn (int $userId, string $key, string $hash, callable $operation): array => $operation());
+
+        $controller = $this->createController($transactionService, $idempotencyService, $user);
         $dto = new CreateTransactionRequest();
         $dto->from_account_id = 1;
         $dto->to_account_id = 2;
         $dto->amount = 10.0;
         $dto->note = 'note';
 
-        $response = $controller->add($dto);
+        $request = Request::create('/api/v1/transactions', 'POST', server: [
+            'HTTP_IDEMPOTENCY_KEY' => 'unit-test-key',
+        ]);
+
+        $response = $controller->add($dto, $request);
         $payload = json_decode($response->getContent() ?: '', true);
 
         self::assertSame(200, $response->getStatusCode());
         self::assertSame('add transaction success', $payload['message']);
+        self::assertSame(42, $payload['transaction_id']);
     }
 
     #[Test]
     public function addThrowsWhenUserNotAuthenticated(): void
     {
         $transactionService = $this->createStub(TransactionService::class);
-        $controller = $this->createController($transactionService, null);
+        $idempotencyService = $this->createStub(IdempotencyService::class);
+        $controller = $this->createController($transactionService, $idempotencyService, null);
 
         $dto = new CreateTransactionRequest();
         $dto->from_account_id = 1;
         $dto->to_account_id = 2;
         $dto->amount = 10.0;
 
+        $request = Request::create('/api/v1/transactions', 'POST', server: [
+            'HTTP_IDEMPOTENCY_KEY' => 'unit-test-key',
+        ]);
+
         $this->expectException(AccessDeniedHttpException::class);
-        $controller->add($dto);
+        $controller->add($dto, $request);
     }
 
-    private function createController(TransactionService $transactionService, ?User $user): TransactionController
-    {
-        $controller = new TransactionController($transactionService, new NullLogger());
+    private function createController(
+        TransactionService $transactionService,
+        IdempotencyService $idempotencyService,
+        ?User $user,
+    ): TransactionController {
+        $controller = new TransactionController($transactionService, $idempotencyService, new NullLogger());
         $controller->setContainer($this->createContainer($user));
 
         return $controller;
@@ -85,7 +104,6 @@ final class TransactionControllerTest extends TestCase
             $tokenStorage->setToken(new UsernamePasswordToken($user, 'main', $user->getRoles()));
         }
         $container->set('security.token_storage', $tokenStorage);
-        $container->set('request_stack', new RequestStack());
         $container->set('serializer', new Serializer(
             [new ArrayDenormalizer(), new ObjectNormalizer()],
             [new JsonEncoder()],

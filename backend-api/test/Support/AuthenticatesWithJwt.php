@@ -40,11 +40,16 @@ trait AuthenticatesWithJwt
         string $uri,
         string $token,
         ?array $body = null,
+        ?string $idempotencyKey = null,
     ): void {
         $server = [
             'HTTP_AUTHORIZATION' => 'Bearer '.$token,
             'CONTENT_TYPE' => 'application/json',
         ];
+
+        if (null !== $idempotencyKey) {
+            $server['HTTP_IDEMPOTENCY_KEY'] = $idempotencyKey;
+        }
 
         $content = null;
         if (null !== $body) {

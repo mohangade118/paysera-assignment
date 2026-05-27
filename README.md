@@ -77,6 +77,7 @@ Application code lives in [`backend-api/`](backend-api/).
 | **Debit-side ownership only** | The authenticated user must own `from_account_id`. `to_account_id` may belong to any user (peer-to-peer transfer). |
 | **Post-commit messaging** | [`TransactionSucceededMessage`](backend-api/src/Message/TransactionSucceededMessage.php) is dispatched **after** `commit()`, so email failures do not roll back the transfer. |
 | **Notification idempotency** | [`TransactionSucceededHandler`](backend-api/src/MessageHandler/TransactionSucceededHandler.php) skips sending if `notifications_sent_at` is already set (safe retries). |
+| **Transfer idempotency (Redis)** | Required `Idempotency-Key` header on `POST /api/v1/transactions`. [`IdempotencyService`](backend-api/src/Services/IdempotencyService.php) claims keys in Redis (`SET NX` + TTL); retries replay the cached response without a second transfer or Messenger dispatch. |
 | **Structured API errors** | [`ApiExceptionSubscriber`](backend-api/src/EventSubscriber/ApiExceptionSubscriber.php) normalizes `/api/*` errors to JSON with `success`, `message`, and optional `errors[]`. |
 | **Request correlation** | [`RequestLifecycleSubscriber`](backend-api/src/EventSubscriber/RequestLifecycleSubscriber.php) accepts `X-Request-Id` or generates one; echoed on responses and attached to logs. |
 | **Redis for cache** | [`config/packages/cache.yaml`](backend-api/config/packages/cache.yaml) uses `cache.adapter.redis`. In **prod**, Doctrine query/result pools use Redis-backed pools ([`doctrine.yaml`](backend-api/config/packages/doctrine.yaml)). |
@@ -108,13 +109,21 @@ Optional correlation header:
 X-Request-Id: <uuid-or-custom-id>
 ```
 
+Required on transfer `POST` (scoped per authenticated user):
+
+```http
+Idempotency-Key: <uuid-or-client-generated-id>
+```
+
+Use a new key for each distinct transfer attempt. Reuse the same key only when retrying the **same** request body after a timeout or ambiguous response.
+
 ### Endpoints
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | `GET` | `/api/health` | Public | Liveness check |
 | `POST` | `/api/login` | Public | Issue JWT (`email`, `password`) |
-| `POST` | `/api/v1/transaction` | JWT | Transfer funds |
+| `POST` | `/api/v1/transactions` | JWT | Transfer funds (requires `Idempotency-Key`) |
 | `GET` | `/api/v1/users/{id}` | JWT | Get user by ID |
 | `GET` | `/api/v1/users/{id}/accounts` | JWT | List accounts for user ID (own ID only) |
 
@@ -145,7 +154,17 @@ X-Request-Id: <uuid-or-custom-id>
 
 Login is throttled: **2 attempts per 15 minutes** per identity (disabled in `test` env).
 
-### `POST /api/v1/transaction`
+### `POST /api/v1/transactions`
+
+**Required header:**
+
+```http
+Idempotency-Key: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+```
+
+| Header | Rules |
+|--------|--------|
+| `Idempotency-Key` | Required. 1–128 characters; letters, numbers, underscores, hyphens only. Unique per user for each distinct transfer. |
 
 **Request body:**
 
@@ -189,12 +208,22 @@ Login is throttled: **2 attempts per 15 minutes** per identity (disabled in `tes
 
 | Status | Typical cause |
 |--------|----------------|
-| 400 | Validation failure, inactive account, insufficient balance |
+| 400 | Validation failure, inactive account, insufficient balance, missing/invalid `Idempotency-Key` |
 | 401 | Missing or invalid JWT |
 | 403 | `from_account_id` exists but does not belong to the authenticated user |
 | 404 | Unknown `from_account_id` or `to_account_id` |
+| 409 | Same `Idempotency-Key` with a different body, or concurrent in-flight request with the same key |
 | 429 | Rate limit exceeded (when enforcement is active; see [Security](#security)) |
 | 500 | Unexpected server error |
+
+**Idempotency behavior**
+
+| Scenario | Result |
+|----------|--------|
+| First `POST` with a new key | Transfer runs once; response cached in Redis (default TTL 24h) |
+| Retry with same key and same body | Same HTTP status and JSON body; no second transfer |
+| Same key, different body | `409` — key reused with different request |
+| Concurrent duplicate while first is processing | `409` — key already in use (stale processing records are reclaimed after 30s) |
 
 ### `GET /api/v1/users/{id}`
 
@@ -254,9 +283,10 @@ docker compose exec php php bin/console doctrine:query:sql \
   "SELECT id, user_id, balance FROM accounts ORDER BY id"
 
 # 4. Transfer 10.00 from account 1 to account 3 (example IDs — adjust to your DB)
-curl -s -X POST http://localhost:8080/api/v1/transaction \
+curl -s -X POST http://localhost:8080/api/v1/transactions \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
   -H "X-Request-Id: demo-transfer-001" \
   -d '{"from_account_id":1,"to_account_id":3,"amount":10,"note":"demo"}'
 ```
@@ -330,7 +360,9 @@ See [`backend-api/.env`](backend-api/.env). Important keys:
 | Variable | Purpose |
 |----------|---------|
 | `DATABASE_URL` | MySQL connection (Docker host: `mysql`) |
-| `REDIS_URL` | Redis connection (Docker host: `redis`) |
+| `REDIS_URL` | Redis connection (Docker host: `redis`) — cache, rate limiting, and transfer idempotency |
+| `IDEMPOTENCY_TTL_SECONDS` | How long completed/failed idempotency records are kept (default `86400`) |
+| `IDEMPOTENCY_PROCESSING_TIMEOUT_SECONDS` | When a `processing` record is considered stale and may be reclaimed (default `30`) |
 | `JWT_SECRET_KEY` / `JWT_PUBLIC_KEY` | Paths to PEM files under `config/jwt/` |
 | `MESSENGER_TRANSPORT_DSN` | AMQP (set in Compose for `php` service) |
 | `MAILER_DSN` | Default `null://null` (no real mail in dev) |
@@ -409,7 +441,7 @@ docker compose exec php composer cs-fix   # apply fixes
 
 1. **Rate limiter timing** — `ApiRateLimitSubscriber` runs on `KernelEvents::REQUEST` at priority **20** and skips when `_route` is empty. Symfony routing typically runs at priority **32**, so limits may not apply until the subscriber matches on `pathInfo` or runs after routing.
 2. **Floating-point money** — balances and amounts use float/DOUBLE; production systems should use `DECIMAL` or minor-unit integers.
-3. **No idempotency** — duplicate `POST` requests create duplicate transfers; no `Idempotency-Key` header.
+3. **Redis-backed idempotency** — duplicate `POST` requests with the same `Idempotency-Key` replay the cached response; if Redis is flushed, duplicate transfers are possible again until keys are re-established.
 4. **No currency check** — transfers do not verify matching `currency_type` on both accounts.
 5. **User profile endpoint** — `GET /api/v1/users/{id}` returns profile data for any active user ID; restrict to the authenticated user’s own ID in production if required.
 6. **Deadlock risk** — locks are taken from → to order; concurrent `A→B` and `B→A` transfers can deadlock; production code should lock accounts in ascending ID order.
@@ -425,7 +457,7 @@ docker compose exec php composer cs-fix   # apply fixes
 | **RabbitMQ** | Offloads email I/O from the HTTP request; retries with exponential backoff ([`messenger.yaml`](backend-api/config/packages/messenger.yaml)) |
 | **Rate limiting** | Protects login and transfer endpoints from abuse (once subscriber timing is fixed; shared Redis pool recommended for multi-instance deployments) |
 
-The transfer itself remains **synchronous** in the request — appropriate for strong consistency on balances. Further scaling would add read replicas, connection pooling, and horizontal PHP workers with shared rate-limit and idempotency stores.
+The transfer itself remains **synchronous** in the request — appropriate for strong consistency on balances. Idempotency keys are stored in **shared Redis** so all PHP workers honor the same `Idempotency-Key` scope per user. Further scaling would add read replicas and connection pooling.
 
 ---
 
@@ -433,7 +465,6 @@ The transfer itself remains **synchronous** in the request — appropriate for s
 
 Production hardening I would add next:
 
-- **Idempotency-Key** header with DB unique constraint or Redis TTL
 - **Lock ordering** by account ID + `DECIMAL(19,4)` (or integer minor units) for amounts
 - **Currency validation** on transfer
 - **Fix rate limiter** to run after routing or match `pathInfo`
